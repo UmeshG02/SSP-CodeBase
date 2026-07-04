@@ -1,0 +1,22 @@
+# Node modules
+node_modules/
+**/node_modules/
+
+# Build outputs
+frontend/.next/
+backend/dist/
+backend/generated/
+
+# Environment files
+.env
+backend/.env
+frontend/.env
+*.env.local
+
+# Logs and system files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.agents/
+.gemini/

@@ -1,0 +1,265 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum ChallengeType {
+  CODING
+  SQL
+  APTITUDE
+  INTERVIEW
+  PUZZLE
+}
+
+model User {
+  id             String         @id @default(uuid())
+  email          String         @unique
+  passwordHash   String?
+  role           Role           @default(USER)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  profile        Profile?
+  submissions    Submission[]
+  xpTransactions XPTransaction[]
+  streaks        Streak?
+  badges         UserBadge[]
+  friendshipsSent Friendship[]   @relation("FriendshipsSent")
+  friendshipsRecv Friendship[]   @relation("FriendshipsReceived")
+  teamMembers    TeamMember[]
+  discussions    Discussion[]
+  comments       Comment[]
+  likes          Like[]
+  learningProgress UserProgress[]
+  dayProgress      UserDayProgress[]
+}
+
+model Profile {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  username     String   @unique
+  avatarUrl    String?
+  college      String?
+  company      String?
+  skills       String[] // e.g., ["React", "TypeScript", "Node.js"]
+  prefLang     String   @default("Python")
+  expLevel     String   @default("Beginner") // Beginner, Intermediate, Expert
+  xp           Int      @default(0)
+  coins        Int      @default(0)
+  level        Int      @default(1)
+  rank         Int?
+}
+
+model Problem {
+  id           String        @id @default(uuid())
+  title        String
+  slug         String        @unique
+  description  String        @db.Text
+  difficulty   Difficulty    @default(EASY)
+  type         ChallengeType @default(CODING)
+  points       Int           @default(10)
+  tags         String[]
+  inputFormat  String?       @db.Text
+  outputFormat String?       @db.Text
+  constraints  String?       @db.Text
+  templateCode String?       @db.Text // JSON map containing templates for different languages
+  solutionCode String?       @db.Text
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  testCases    TestCase[]
+  submissions  Submission[]
+  comments     Comment[]
+  dayId        String?
+  day          Day?          @relation(fields: [dayId], references: [id], onDelete: Cascade)
+}
+
+model TestCase {
+  id           String   @id @default(uuid())
+  problemId    String
+  problem      Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  input        String   @db.Text
+  expected     String   @db.Text
+  isSample     Boolean  @default(false)
+}
+
+model Submission {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId  String
+  problem    Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  language   String
+  code       String   @db.Text
+  status     String   // e.g. "ACCEPTED", "WRONG_ANSWER", "RUNTIME_ERROR", "COMPILE_ERROR"
+  runtime    Float?   // in ms
+  memory     Float?   // in KB
+  createdAt  DateTime @default(now())
+}
+
+model Streak {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentStreak Int     @default(0)
+  longestStreak Int     @default(0)
+  lastActive   DateTime @default(now())
+}
+
+model Badge {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  description String
+  imageUrl    String
+  users       UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeId   String
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  earnedAt  DateTime @default(now())
+}
+
+model XPTransaction {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Int
+  reason    String   // e.g. "DAILY_CHALLENGE", "STREAK_BONUS"
+  createdAt DateTime @default(now())
+}
+
+model Friendship {
+  id         String   @id @default(uuid())
+  senderId   String
+  sender     User     @relation("FriendshipsSent", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User     @relation("FriendshipsReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+  status     String   // "PENDING", "ACCEPTED", "REJECTED"
+  createdAt  DateTime @default(now())
+}
+
+model Team {
+  id        String       @id @default(uuid())
+  name      String       @unique
+  avatarUrl String?
+  createdAt DateTime     @default(now())
+  members   TeamMember[]
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   // "LEADER", "MEMBER"
+  joinedAt  DateTime @default(now())
+}
+
+model Discussion {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  content   String    @db.Text
+  tags      String[]
+  createdAt DateTime  @default(now())
+  comments  Comment[]
+}
+
+model Comment {
+  id           String      @id @default(uuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId    String?
+  problem      Problem?    @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  discussionId String?
+  discussion   Discussion? @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  content      String      @db.Text
+  createdAt    DateTime    @default(now())
+  likes        Like[]
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model LearningPath {
+  id          String         @id @default(uuid())
+  title       String
+  description String         @db.Text
+  slug        String         @unique
+  weeks       Week[]
+  progress    UserProgress[]
+}
+
+model Week {
+  id         String       @id @default(uuid())
+  pathId     String
+  path       LearningPath @relation(fields: [pathId], references: [id], onDelete: Cascade)
+  title      String
+  weekNumber Int
+  days       Day[]
+}
+
+model Day {
+  id           String            @id @default(uuid())
+  weekId       String
+  week         Week              @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  title        String
+  dayNumber    Int
+  objectives   String[]
+  problems     Problem[]
+  userProgress UserDayProgress[]
+}
+
+model UserProgress {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pathId      String
+  path        LearningPath @relation(fields: [pathId], references: [id], onDelete: Cascade)
+  currentWeek Int          @default(1)
+  currentDay  Int          @default(1)
+
+  @@unique([userId, pathId])
+}
+
+model UserDayProgress {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dayId       String
+  day         Day       @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  timeSpent   Int       @default(0)
+  xpEarned    Int       @default(0)
+  accuracy    Float     @default(0.0)
+  score       Int       @default(0)
+
+  @@unique([userId, dayId])
+}

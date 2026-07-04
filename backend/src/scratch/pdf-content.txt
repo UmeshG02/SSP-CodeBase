@@ -1,0 +1,1080 @@
+SHIVA SAI PERSEVERANCE
+1. Purpose of the IT Industry
+The IT Industry exists to solve business and human problems using
+technology.
+Examples:
+● Banking → Online transactions
+● Healthcare → Patient records
+● E-commerce → Online shopping
+● Education → Learning platforms
+2. Product Delivery
+A product is built once and sold to many customers.
+Examples:
+● Windows
+● Microsoft Office
+● Photoshop
+● Zoom
+3. Service Delivery
+A service is customized for a specific client.
+Examples:
+● TCS
+● Infosys
+● Wipro
+● Accenture
+4. Human-Level Language
+
+-- 1 of 66 --
+
+High-level languages are designed to be read, written, and understood
+by humans.
+In computers and programming, this refers to high-level languages.
+Examples
+● Python
+● Java
+● C
+● JavaScript
+5. Machine-Level Language
+Machine language is a low-level programming language that is
+understood by computers. Machine language is made up of binary bits 0
+and 1.
+Example:
+10101010 11001100 00001111
+A computer can understand this directly, but humans cannot easily
+understand it.
+6. Binary code
+A binary code is the value of a Data encoding convention represented in
+a binary notation that usually is a sequence of 0s and 1s, sometimes
+called a bit string.
+Example:
+Character A
+ASCII → 65
+Binary → 01000001
+7. Data Centre
+
+-- 2 of 66 --
+
+A data centre is a centralised physical facility that houses networked
+computers, servers, and data storage drives.
+Examples:
+● Google Data Centres
+● AWS Data Centres
+● Azure Data Centres
+8. Server
+A server is a computer that provides data, services, or resources to other
+computers (called clients) over a network.
+Example:
+Imagine a restaurant:
+● Customer → asks for food
+● Server (waiter) → brings food
+9. IDE Installation (VS Code)
+Download VS Code
+https://code.visualstudio.com/
+Install Python
+
+-- 3 of 66 --
+
+https://www.python.org/downloads/
+Install Python Extension
+Result
+10. Binary Format
+Binary format represents data using only two digits, 0 and 1.
+Example:
+13
+13 ÷ 2 = 6 remainder 1
+
+-- 4 of 66 --
+
+6 ÷ 2 = 3 remainder 0
+3 ÷ 2 = 1 remainder 1
+1 ÷ 2 = 0 remainder 1
+Binary Value : 1101
+11.Why Programming Languages Are Needed
+Humans cannot write everything in binary. Programming languages are
+used to communicate instructions to a computer in a form that humans
+can easily understand and write.
+Specialized tools like compiler and interpreter then translate this
+human-readable code into the machine language the central processing
+unit (CPU) requires
+12. High-Level Programming Languages
+A High-Level Programming Language (HLL) is a programming language
+that is easy for humans to read, write, and understand.
+Instead of writing binary code (0 and 1), programmers write instructions
+using English-like syntax.
+Examples:
+● Python
+● Java
+● C++
+● JavaScript
+Advantages:
+● Easy to read
+● Easy to write
+● Faster development
+13. Compiler vs Interpreter
+
+-- 5 of 66 --
+
+A compiler translates the entire source code into machine code at once
+before execution, creating a standalone executable file.
+Examples: C++ , C
+An interpreter reads and translates the source code line by line in
+real-time as the program is running.
+Example: Python , JavaScript
+14. High-Level Code to Machine-Level Language
+A Language Translator is a specific type of system software that acts as a
+converter.
+It serves to connect high-level, human-readable code with the machine-level
+binary sequences consisting of 0s and 1s that a computer processor can
+execute.
+High-Level Code → Compiler/Interpreter → Machine Code (0s and 1s) → CPU
+Execution → Output.
+15. Python Variables
+A variable in Python is like a container or label that holds a value. You can use
+it to store data like numbers, text etc., and then use that data later in your
+code.
+
+-- 6 of 66 --
+
+16. Python Data Types
+In Python, a data type is a classification that tells the interpreter what kind of
+value a variable holds, and what kind of operations you can perform on that
+value.
+17. Number Data Types
+A Number is a data type used to represent numeric values. Python supports
+several types of numbers, and they're used for mathematical operations,
+counting, measuring, etc.
+1. Integer (int)
+Stores whole numbers (no decimal point).
+Example:
+
+-- 7 of 66 --
+
+2. Float (float)
+Stores numbers with a decimal point.
+Example:
+3. Complex (complex)
+Used for mathematical and scientific calculations.
+Format:
+a + bj
+where:
+● a = Real part
+● b = Imaginary part
+● j = Square root of -1
+
+-- 8 of 66 --
+
+Examples:
+18. Arithmetic Operations
+● Addition (+): Adds two operands (e.g., 10 + 3 = 13).
+● Subtraction (-): Subtracts the second operand from the first (e.g., 10 - 3 = 7).
+● Multiplication (*): Multiplies two operands (e.g., 10 * 3 = 30).
+● Division (/): Divides the first operand by the second, always returning a float
+(e.g., 10 / 3 = 3.33).
+● Floor Division (//): Divides and rounds down to the nearest whole number
+(e.g., 10 // 3 = 3).
+● Power (**): Raises the first operand to the power of the second (e.g., 10 ** 3
+= 1000).
+
+-- 9 of 66 --
+
+● Modulus (%): Returns the remainder of the division of the first operand by the
+second (e.g., 10 % 3 = 1).
+19. Strings
+Strings: Strings are sequences of characters enclosed in single quotes (') or
+double quotes ("). Strings are one of the most commonly used data types in
+Python, and they provide a variety of methods to manipulate and interact with
+text-based data.
+mystring = "Hello World"
+print(mystring)
+Explanation:
+● You define a variable mystring and assign it the text "Hello World".
+● print(mystring) simply outputs the entire string.
+Explanation:
+mystring[0] accesses the first character of the string (Python starts counting
+from 0).
+Explanation:
+● mystring[-1] accesses the last character of the string.
+
+-- 10 of 66 --
+
+● Negative indices count from the end (so -1 is the last character, -2 is
+second-last, etc.)
+Explanation:
+● mystring is a string containing "Hello World".
+● mystring[2:5] uses string slicing, which extracts a portion of the string.
+How slicing works: string[start:stop]
+● Start index: 2 → This is inclusive (it includes the character at index 2).
+● Stop index: 5 → This is exclusive (it does not include the character at
+index 5).
+mystring = "Hello World"
+print(mystring[::])
+It just returns the entire string unchanged.
+This slices the string from beginning to end, taking every 2nd character.
+mystring[::2] means:
+● Start: from beginning
+● Stop: until the end
+● Step: 2 (every second character)
+mystring.upper()
+
+-- 11 of 66 --
+
+● This converts all letters in the string to uppercase.
+● "Hello World" becomes "HELLO WORLD"
+mystring.lower()
+● This converts all letters to lowercase.
+● "Hello World" becomes "hello world".
+What .split() does:
+● The .split() method breaks a string into a list of words, using spaces as the
+default separator.
+What's happening?
+● You're using .split('W'), which tells Python:
+➤ "Split the string wherever you find the letter 'W'"
+
+-- 12 of 66 --
+
+mystring = "This is the Initial Text"
+● You're assigning a string to the variable mystring.
+modifiedstring = "This is the Initial Text {}".format("New Text Added")
+● This uses .format() to insert "New Text Added" into the placeholder {}.
+● You're using .format() to insert values into {} placeholders.
+● The first {} gets "apple", the second gets "banana".
+This code uses named placeholders with the .format() method. Inside the string
+"1: {a} 2: {b}", {a} and {b} are placeholders that get replaced by the values
+provided in .format(). Specifically, a="apple" and b="banana" assign "apple" to
+{a} and "banana" to {b}.
+20. Lists
+
+-- 13 of 66 --
+
+A List is a collection of multiple items stored in a single variable.
+Lists are:
+● Ordered (items have positions/indexes)
+● Mutable (can be changed)
+● Allow duplicate values
+● Can store different data types
+grocery_list = ["apples", "bananas", "carrots", "milk"]
+print("Grocery List:", grocery_list)
+# Accessing the first item
+print("First item:", grocery_list[0])
+# Adding an item to the list
+grocery_list.append("eggs")
+print("Updated List:", grocery_list)
+# Removing an item from the list
+grocery_list.remove("bananas")
+print("After removing bananas:", grocery_list)
+# Accessing a sublist (first two items)
+print("Sublist:", grocery_list[:2])
+
+-- 14 of 66 --
+
+Python
+This Python code demonstrates basic list operations on a grocery_list. Initially,
+the list contains ["apples", "bananas", "carrots", "milk"]. The code performs the
+following actions:
+1. Prints the entire list: print("Grocery List:", grocery_list) displays the original
+list.
+2. Accesses the first item: grocery_list[0] retrieves the first item in the list,
+which is "apples", and prints it.
+3. Adds a new item: .append("eggs") adds "eggs" to the end of the list, and the
+updated list is printed.
+4. Removes an item: .remove("bananas") removes the first occurrence of
+"bananas", and the modified list (without bananas) is printed.
+5. Accesses a sublist: grocery_list[:2] retrieves the first two items from the list,
+which are "apples" and "carrots", and prints this sublist.
+# Create a list of fruits
+fruits = ["apple", "banana", "cherry", "orange", "kiwi"]
+List Creation: A list of fruits is created with five items: "apple", "banana",
+"cherry", "orange", and "kiwi".
+Creating and printing a list:
+● number_list = [1, 2, 3] creates a list of integers.
+● print(number_list) prints the list: [1, 2, 3].
+Getting the length of the list:
+
+-- 15 of 66 --
+
+● len(number_list) returns the number of elements in the list
+number_list, which is 3 since the list contains three elements.
+● print(len(number_list)) prints the length of the list: 3.
+Creating two lists of fruits:
+● fruits = ["apple", "banana", "cherry"] defines a list of fruit names.
+● more_fruits = ["orange", "kiwi", "grapes"] defines another list of fruits.
+Extending a list:
+● .extend(more_fruits) is used to add all elements of the more_fruits list to
+the fruits list.
+● After the extension, the fruits list becomes: ["apple", "banana", "cherry",
+"orange", "kiwi", "grapes"].
+Printing the updated list:
+● print(fruits) prints the extended fruits list: ["apple", "banana", "cherry",
+"orange", "kiwi", "grapes"].
+Removing the Last Item:
+
+-- 16 of 66 --
+
+● The .pop() method removes the last item of the list by default, which is
+"kiwi".
+● The list is updated to ["apple", "banana", "cherry", "orange"].
+Removing an Item by Index:
+● The .pop(1) method removes the item at index 1 (which is
+"banana").
+● The list is updated to ["apple", "cherry", "orange"].
+Reversing the List
+● fruits.reverse() reverses the order of the elements in the list fruits,
+so the last item becomes the first and vice versa.
+● The reversed list is printed: ['kiwi', 'orange', 'cherry', 'banana',
+'apple'].
+Sorting the List:
+
+-- 17 of 66 --
+
+● number_list.sort() sorts the list number_list in ascending order
+(numerically).
+● The sorted list is printed: [1, 2, 5, 6, 8, 9].
+Displaying a Nested List:
+● my_list = [1, 2, 3, ['a', 'b', 'c']] creates a list containing an internal
+sublist as its final element.
+● print(my_list) outputs every component, demonstrating the
+nested structure: [1, 2, 3, ['a', 'b', 'c']].
+Accessing elements within a sublist:
+● my_list[3] retrieves the fourth element, which is the internal list ['a',
+'b', 'c'], and prints it.
+● my_list[3][1] targets the second component inside the sublist, "b", and
+outputs its value.
+21. Dictionary:
+In Python, a dictionary is a classification that manages data through key-value
+pairs.
+
+-- 18 of 66 --
+
+Explanation:
+● A dictionary my_dict is created with three key-value pairs:
+○ "name": "Shiva": The key is "name", and its value is "Shiva".
+○ "age": 34: The key is "age", and its value is 34.
+○ "city": "Tirupathi": The key is "city", and its value is "Tirupathi".
+Explanation:
+● An initial dictionary named person is established with three specific
+key-value pairs:
+○ "name": "Alice": This pair uses the key "name" to represent the
+data "Alice".
+○ "age": 30: This pair uses the key "age" to represent the numeric
+data 30.
+
+-- 19 of 66 --
+
+○ "address": {"city": "Wonderland", "zipcode": "12345"}: Here, the
+key "address" points to a nested dictionary containing location
+details.
+● Retrieving Data from the Dictionary:
+○ person["name"] is used to extract the value linked to "name",
+resulting in "Alice".
+○ person["age"] targets the "age" key to pull the value 30.
+○ person["address"]["city"] performs nested indexing to find
+"Wonderland" within the address sub-dictionary.
+● Outputting Results:
+○ print(name) displays the string "Alice".
+○ print(age) displays the integer 30.
+○ print(city) displays the location "Wonderland".
+Explanation:
+1. Creating the Dictionary:
+- The dictionary items has three key-value pairs:
+○ "item1": "Mangoes"
+
+-- 20 of 66 --
+
+○ "item2": "Potatoes"
+○ "item3": "curry leaves"
+2. Printing the Dictionary Before Modification:
+- print("Before modifying list") prints a message before showing the
+original dictionary.
+- print(items) displays the dictionary as it is: {'item1': 'Mangoes',
+'item2': 'Potatoes', 'item3': 'curry leaves'}.
+3. Modifying the Value of a Key:
+- items["item3"] = "brinjal" updates the value associated with
+"item3" from "curry leaves" to "brinjal".
+4. Printing the Dictionary After Modification:
+- print("After modifying list") prints a message before showing the
+updated dictionary.
+- print(items) displays the modified dictionary: {'item1': 'Mangoes',
+'item2': 'Potatoes', 'item3': 'brinjal'}.
+22. Tuples
+This code demonstrates how tuples work in Python. In the first part, a tuple
+mytuple = (1, 2, 3) is created, and mytuple[1] accesses the second element
+(value 2), which is valid and prints correctly. 21 However, in the second part,
+after printing the second element again, the code attempts to modify the first
+
+-- 21 of 66 --
+
+element with mytuple[0] = "5". This causes a TypeError because tuples are
+immutable in Python, meaning their elements cannot be changed after
+creation. Therefore, the code will crash at that line with an error message
+stating that tuple objects do not support item assignment.
+23. Sets
+This code demonstrates how sets work in Python, focusing on their properties
+of uniqueness and unordered storage. Here's the explanation:
+1. 1. Creating and Modifying a Set:
+- x = set() creates an empty set.
+- x.add(1), x.add(2), and x.add(5) add elements to the set.
+- x.add(2) is repeated, but sets do not allow duplicates, so 2 is
+stored only once.
+- Final output of print(x) will show: {1, 2, 5} (order may vary because
+sets are unordered).
+2. 2. Defining a Set with Duplicate Values:
+- tags = {"Python", "Programming", "Tech ", "Programming"} creates
+a set with four items, but "Programming" is listed twice.
+- Sets automatically remove duplicates, so "Programming" appears
+only once.
+- The string "Tech " has a trailing space, so it's considered distinct
+from "Tech" (no trimming happens automatically).
+
+-- 22 of 66 --
+
+- Output of print(tags) will be something like: {'Python', 'Tech ',
+'Programming'} (again, order is not guaranteed).
+24. Boolean Variables
+Explanation:
+1. Boolean Variables:
+- is_active = True: A variable is_active is assigned the Boolean value
+True.
+- is_completed = False: Another variable is_completed is assigned
+False.
+2. Printing a Boolean:
+- print(is_completed) simply prints the value of is_completed, which
+is False.
+3. Formatted String (f-string):
+- print(f"Is user active or not : {is_active}") uses an f-string to
+include the value of is_active within the printed message.
+25. Comparison Operators:
+In programming, comparison operators are specific symbols or keywords
+utilized to evaluate the relationship between two values. These operations
+always result in a Boolean outcome, yielding either True or False based on the
+validity of the comparison.
+
+-- 23 of 66 --
+
+Example:
+Comparison operators are used to compare two values, and they always return
+a Boolean result—either True or False.
+The examples likely demonstrate how these operators check the relationship
+between values:
+● Equal to (==): Checks if two values are the same (e.g., 10 == 20 is False).
+● Not equal to (!=): Checks if two values are different (e.g., 10 != 20
+isTrue).
+● Greater than (>) / Less than (<): Compares magnitude (e.g., 10 < 20 is
+True).
+
+-- 24 of 66 --
+
+● Greater than or equal to (>=) / Less than or equal to (<=): Checks if a
+value is greater/less than or exactly equal to another (e.g., 10 >= 5 is
+True).
+26. Logical operators:
+Logical operators are used to combine multiple Boolean expressions
+(conditions) and return a True or False result based on logical relationships.
+Example:
+There are three primary logical operators:
+1. Logical AND: This operator yields a True outcome only when both
+conditions are satisfied.
+a. Example: The expression (10 > 5 and 5 < 10) results in True.
+2. Logical OR: This operator yields True if at least one of the evaluated
+conditions is true.
+a. Example: The expression (10 < 5 or 5 < 10) results in True.
+
+-- 25 of 66 --
+
+3. Logical NOT: This operator reverses the Boolean value, returning True for
+false conditions and False for true ones.
+a. Example: The expression (not (10 == 5)) results in True.
+27. Condition Statements
+if Statement
+Executes a block of code only if the condition is true.
+if...else Statement
+Lets you run one block if the condition is true, and another if it’s false.
+Explanation:
+● The if part checks a condition (a question like: "Is x greater than 5?").
+● If the answer is yes (True), Python runs the code inside the if block.
+● If the answer is no (False), Python skips the if block and goes to the
+else block.
+● The else block is like a backup plan — it runs only if the if condition is
+False.
+
+-- 26 of 66 --
+
+if...elif Statement:
+It's a way in Python to check multiple conditions, one after the other.
+● if = checks the first condition.
+● elif = checks the next condition only if the first one is False.
+● You can have as many elif statements as you want.
+● When the age variable is below 13, the output displays "Child".
+● For ages between 13 and 17 inclusive, the program outputs
+"Teen".
+● In every other case (18 or above), the system prints "Adult".
+28. For Loops:
+A for loop is a control flow statement in programming that is used to iterate
+over (or loop through) a sequence (like a list, string, or range). It helps you
+perform repetitive tasks efficiently by executing a block of code multiple times.
+
+-- 27 of 66 --
+
+Numerical Data Collection:
+An initial sequence of integers is established as follows: [1, 2, 3, 4,
+5].
+Looping Mechanism:
+The logic utilizes a for loop to traverse every individual component
+within the sequence. In each cycle, the num variable serves as a
+container for the specific item currently being processed.
+Process Flow(Execution):
+● Initially, the variable num points to 1 (the starting element) and
+outputs its value.
+● Moving forward, num shifts to the second entry, 2, and displays
+it.
+● This repetitive action proceeds until every digit in the entire
+sequence has been outputted.
+29.Tuple Unpacking
+This line creates a list called my_list. The list contains three elements,
+and each element is a tuple — which is an immutable sequence.
+
+-- 28 of 66 --
+
+Rather than mapping the whole tuple into a single variable, this
+approach unpacks the internal values directly into two distinct variables,
+t1 and t2.
+Execution Breakdown:
+● Initial cycle: The pair (1, 2) is assigned to (t1, t2), resulting in 1
+being outputted.
+● Following cycle: The pair (3, 4) is mapped to (t1, t2), resulting in 3
+being outputted.
+● Final cycle: The pair (5, 6) is mapped to (t1, t2), resulting in 5 being
+outputted.
+30. String Formatting Methods
+Showing two different ways to print the value of a variable in Python — both
+do the same thing, but with different styles. Let's break it down:
+In the string "Value of a: {}", the curly braces function as a format string.
+The {} acts as a placeholder, which Python replaces with the specific data held
+in variable a.
+
+-- 29 of 66 --
+
+By calling .format(a), the system populates the placeholder with the integer 5.
+In the provided code, the sequence "Value of a: " functions as a literal text
+string.
+The str(a) function is used to transform the numerical integer data into a
+textual representation, "5".
+The addition symbol (+) acts as a concatenation tool to merge these separate
+strings into one.
+Initial Data Sequence:
+The process begins with a sequence named x, established with four
+distinct integers.
+Iteration Mechanism:
+A for loop is utilized to traverse every individual component, represented
+by variable i, within the sequence x.
+Process Flow (Execution):
+During each cycle, the logic calculates the power of i squared (i**2) and
+stores the result in a separate output collection as follows:
+● Initial cycle: i is 1, resulting in a value of 1.
+● Second cycle: i is 2, resulting in a value of 4.
+● Third cycle: i is 3, resulting in a value of 9.
+
+-- 30 of 66 --
+
+● Final cycle: i is 4, resulting in a value of 16.
+31. List Comprehension
+The code uses list comprehension to create a new list in a concise and efficient
+way.
+The original list x contains the integers: [1, 2, 3, 4].
+The expression [i**2 for i in x]:
+● Loops through each element i in the list x.
+● Computes i**2, which means squaring each number.
+● Collects all the squared values into a new list called output.
+The print(output) statement displays: [1, 4, 9, 16].
+This method is:
+● Shorter than a traditional for loop.
+● More readable and Pythonic. 30
+● A common and efficient way to transform or filter lists in Python.
+32.While Loops
+A while loop in Python is used to repeatedly execute a block of code as long as
+a specified condition remains TRUE
+1. Syntax of a while Loop
+while condition:
+# code to execute while the condition is True.
+# update the condition variable
+2. A simple Example
+
+-- 31 of 66 --
+
+3. Infinite Loop
+If the condition inside a while loop never becomes false , the loop will
+run forever, freezing your program. This is called an infinite loop.
+4. Controlling Loop
+a. Break
+
+-- 32 of 66 --
+
+break immediately terminates the loop completely, skipping any
+remaining code inside it.
+b. continue
+continue skips the rest of the current iteration and jumps straight
+back to evaluating the condition for the next turn.
+33. Functions:
+A function in programming is a block of reusable code designed to perform a
+specific task. Functions allow you to group related code together, so you can
+call that code whenever needed, which makes your code more organized,
+reusable, and easier to understand.
+
+-- 33 of 66 --
+
+Explanation:
+Defining the Function (def greet()):
+This syntax establishes a new function identified as greet.
+In programming, these are modular segments of logic that remain
+dormant until triggered.
+The Function Body:
+The instruction print("Welcome to SSP") constitutes the internal code
+logic.
+Execution of the function results in displaying the greeting "Welcome to
+SSP".
+Invoking the Function (greet()):
+This statement represents a formal function call.
+It instructs the Python interpreter to run the sequence defined within
+greet.
+
+-- 34 of 66 --
+
+def greet():
+● This syntax establishes a new function identified as greet.
+""" This is Informational Text """
+● This represents a docstring, which is short for documentation string.
+● It functions as a unique multi-line comment meant to explain the
+purpose of the logic.
+● It serves for better documentation and help tools without changing the
+execution results.
+print("Welcome to SSP")
+● The instruction constitutes the internal logic to display the greeting
+message.
+greet()
+● This statement represents a formal function call to execute the code.
+
+-- 35 of 66 --
+
+def greet():
+● This syntax establishes a new function identified as greet.
+return "Welcome to SSP"
+● The logic passes the greeting back to the calling statement rather than
+outputting it.
+● This sends the result back to the invoker without an automatic display
+to the user.
+greet()
+● The function is formally invoked, but the sent back value
+remains unhandled.
+● Consequently, the execution yields no visible text on the
+console..
+
+-- 36 of 66 --
+
+Function Definition
+● The syntax def add(a, b): establishes a new function identified as add,
+designed to accept two distinct inputs, a and b.
+Performing Addition
+● Within the internal logic, the instruction result = a + b combines the
+values provided for both parameters.
+Storing the Result
+● This calculated sum is then placed into a container variable named
+result for subsequent use.
+Printing the Result
+● The print(result) statement executes to display the numeric data held
+in the result onto the console.
+Calling the Function
+● Invoking add(10, 1) triggers the logic, passing the integer 10 to a and 1
+to b.
+What Happens During Execution
+● The processor calculates the sum of 10 and 1, yields the value 11, and
+outputs the result to the user.
+
+-- 37 of 66 --
+
+Function Definition
+● The syntax def add(a, b) : establishes a new function identified
+as add, designed to accept two distinct inputs, a and b.
+Type Verification
+● Within the internal logic, the system evaluates if both
+parameters are integers by comparing their data types against the
+integer 11.
+Conditional Execution
+● When the validation is successful, the processor calculates the
+sum and utilizes a formatted string to display "Added Result: " along with
+the total.
+Error Handling
+● Should either input fail the integer check, the else block triggers
+to output the message "Please provide integer numbers".
+Invoking the Logic
+
+-- 38 of 66 --
+
+● Calling add(10, 1) provides two whole numbers, ensuring the
+condition is satisfied for execution.
+Execution Breakdown
+● The processor combines 10 and 1, yields a numeric result of 11,
+and displays the final string "Added Result: 11" to the user.
+35. Scope of Variables
+The LEGB rule in Python describes the search order for variable names when
+they are referenced in the code. LEGB stands for:
+1. L: Local
+2. E: Enclosing Function Locals
+3. G: Global
+4. B: Built-in
+Local scope: Refers to variables defined within the current function or block.
+Enclosing scope: Refers to variables in any enclosing functions (functions that
+contain the current function).
+Global scope: Refers to variables defined at the top level of the module or
+script.
+Built-in scope: Refers to Python's standard library functions, exceptions, and
+built-in objects (e.g., print(), len()).
+
+-- 39 of 66 --
+
+Global Variable:
+● The name variable is globally defined with the value "This is Global
+Name".
+● This global variable is accessible from anywhere in the code unless
+shadowed by a local variable.
+invite() Function:
+● Inside the invite() function, a local variable name = "Shiva" is defined.
+● This local name variable shadows or overrides the global name within
+the invite() function.
+● The name defined in invite() is only available within that function's
+scope.
+Nested subinvite() Function:
+● The function subinvite() is defined inside invite(), and it tries to print a
+message using the name variable.
+● Since subinvite() is inside invite(), it looks for the name variable in the
+enclosing invite() function's scope. It does not check the global scope
+unless there’s no name in the local scope.
+
+-- 40 of 66 --
+
+● The name variable in invite() has the value "Shiva", so subinvite() prints
+"Welcome Shiva”.
+Calling subinvite() in invite():
+● Inside the invite() function, subinvite() is called.
+● The call to subinvite() triggers the print statement, using the name variable
+from invite()'s scope.
+Calling invite():
+● Finally, the invite() function is called, which calls subinvite() and results
+in the print output "Welcome Shiva".
+Global Variable:
+● name = "This is Global Name" is defined globally, accessible
+throughout the program unless overshadowed by a local variable.
+Local Variable Inside invite() Function:
+● Inside the invite() function, a local variable name = "Shiva" is defined.
+
+-- 41 of 66 --
+
+● This local variable shadows the global name within the invite() function
+scope.
+Nested Function subinvite():
+● The subinvite() function is defined inside the invite() function.
+● Inside subinvite(), the code tries to access and print the value of name.
+Lexical Scoping:
+● subinvite() first looks for name in its local scope (it doesn't find it
+there).
+● It then checks the enclosing scope (invite()), where name = "Shiva" is
+found.
+● The local name (inside invite()) is used, not the global name.
+Calling the invite() Function:
+● When invite() is called, it calls subinvite(), and subinvite() prints
+Welcome Shiva.
+
+-- 42 of 66 --
+
+
+
+-- 43 of 66 --
+
+35. Lambda Functions
+A lambda function in Python is a small, anonymous function. "Anonymous"
+means that the function is defined without a name and without using the
+standard def keyword.
+1. Syntax of a Lambda Function
+
+-- 44 of 66 --
+
+lambda arguments: expression
+lamdba: The keyword that tells Python you are creating an anonymous
+function.
+arguments: A comma-separated list of inputs (just like parameters in a
+normal function).
+expression: A single line of code that gets executed and automatically
+returned.
+2. Common uses
+a. With filter():
+The filter () function extracts elements from an iterable if they
+meet a specific condition.
+b. With map():
+The map() function applies a specific operation to every item in an
+iterable.
+
+-- 45 of 66 --
+
+c. with sorted():
+You can use a lambda function to customize how a collection of
+data is sorted.
+36. Object-Oriented Programming (OOP)
+OOPS stands for:
+Object Oriented Programming System
+It is a programming method used to organize code in a better and
+smarter way.
+OOPS helps programmers:
+
+-- 46 of 66 --
+
+● write clean code
+● reuse code
+● manage large projects easily
+● reduce repetition
+Real Life Understanding of OOPS
+Consider the analogy of a vehicle, specifically a Car.
+Such a machine comprises:
+Distinct Properties:
+● Its visual color
+● The manufacturer brand
+● The current speed
+Operational Actions:
+● To start the ignition
+● To stop the engine
+● To move forward
+
+-- 47 of 66 --
+
+Within the Python environment, we represent these real-world entities
+through OOPS principles.
+37. Main Concepts in OOPS
+For beginners, first understand:
+● Class
+● Object
+These are the foundation of OOPS.
+What is a Class?
+A Class is a blueprint or design for creating objects. OR A Class is a template
+that defines properties and actions.
+Simple Real Life Example
+Consider the analogy of a handheld device, specifically a Mobile Phone.
+Every such device comprises:
+Distinct Properties:
+● The manufacturer brand
+● Its visual color
+
+-- 48 of 66 --
+
+● The hardware RAM capacity
+Operational Actions:
+● To perform voice calling
+● To utilize the camera
+● To engage in messaging
+Within this framework, the design or template is identified as a Class, while the
+actual physical devices are known as Objects.
+Definition of Class
+A Class is a collection of:
+● Variables → Properties/Data
+● Functions → Actions/Behaviors
+Example Explanation
+Within this framework, a Student Class might comprise:
+Distinct Properties:
+● Its identifying name
+● The unique roll number
+
+-- 49 of 66 --
+
+● The academic marks data
+Operational Actions:
+● To perform reading
+● To engage in writing
+● To participate in examinations
+What is an Object?
+An Object is a real instance created from a class. OR Object is the actual thing
+created using the class design.
+Real Life Example
+Class → Bike Design
+Object → Honda Bike, Yamaha Bike
+Class → Student Form
+Object → Ravi, Sita, Ram
+Why Do We Use Classes?
+Without class:
+● code becomes lengthy
+
+-- 50 of 66 --
+
+● repeated code increases
+● difficult to manage projects
+With class:
+✅ code becomes reusable
+✅ easy to manage
+✅ organized structure
+✅ faster development
+38. Constructors (*init*)
+a constructor is a special type of method that is automatically called when a
+new object (instance) of a class is created.
+1. _ _ init _ _ Method
+In Python, the constructor is always named _ _ init _ _ (with two
+underscores before and after the word "init", which stands for
+initialization).
+2. Types of Constructors
+A. Default Constructor
+
+-- 51 of 66 --
+
+an initialization method that takes no arguments except self
+B. Parameterized Constructor
+A constructor that accepts parameters (arguments) along with self to
+dynamically initialize attributes
+39. Inheritance
+Within the OOPS framework, inheritance functions as a primary pillar. It
+enables a newly created Child or Derived class to acquire the properties and
+actions of a pre-existing Parent or Base class design.
+
+-- 52 of 66 --
+
+1. Syntax
+2. super() Function
+The super () function is a built-in tool that allows the child class to call
+methods from its parent class.
+3. Method Overriding
+Method Overriding occurs when a child class provides its own
+implementation of a method that already exists in the parent class.
+
+-- 53 of 66 --
+
+4. Types of Inheritances
+Single Inheritance:One child inherits from one parent.(e.g., Parent ➔
+Child).
+Multiple Inheritance:One child inherits from multiple parents. (e.g.,
+Child ➔ (father, Mother).
+Multilevel Inheritance:Inheritance happens in levels. (e.g., Grandparent
+➔ Parent ➔ Child).
+Hierarchical Inheritance: Multiple child classes inherit from a single
+parent class (e.g., Parent ➔ (son, daughter) ).
+
+-- 54 of 66 --
+
+Hybrid Inheritance: Combination of two or more inheritance types.
+40. Polymorphism
+The word itself comes from Greek, meaning "many forms." In programming,
+polymorphism allows different classes to have methods with the exact same
+name but different behaviors.
+1. Method Overriding (Runtime Polymorphism)
+
+-- 55 of 66 --
+
+Method overriding occurs when a child class provides a specific
+implementation for a method that is already defined in its parent
+class.
+2. Compile-Time Polymorphism
+It is also known as Method Overloading Same method name different
+parameters.
+Note: Python does not support traditional method overloading like
+Java/C++.
+3. Duck Typing
+objects do not even need to inherit from the same parent
+class.
+
+-- 56 of 66 --
+
+41. Encapsulation
+Encapsulation is the process of hiding data and allowing access to it only
+through methods.
+Methods:
+1. Getters: Used to read/access private data.
+2. Setters: Used to modify/update private data.
+
+-- 57 of 66 --
+
+42. Exception Handling
+Exception Handling is a mechanism used to handle runtime errors so that the
+program does not crash.
+1. try and except:
+Python uses a try - expect block to catch and handle exceptions.
+● try block: Contains the code that might throw an error.
+● expect block: Contains the code that executes only if an
+error happens inside the try block or Handles an error
+
+-- 58 of 66 --
+
+2. Catching Multiple Specific Exceptions
+A single try block can have multiple except blocks to handle different
+types of errors uniquely. It is always best practice to catch specific exceptions
+rather than using a generic except:
+3. else and finally
+else: Runs if no exception occurs.
+finally : Runs whether an exception occurs or not.
+
+-- 59 of 66 --
+
+Block When does it
+execute?
+Common Use Case
+else 	Only if no
+exceptions were
+raised in the try
+block.
+Code that should run
+only if the try block was
+100% successful.
+finall
+y
+Always, regardless
+of whether an error
+occurred or not.
+Cleanup actions (e.g.,
+closing a database
+connection or saving a
+file).
+4. raise Exception (optional)
+
+-- 60 of 66 --
+
+raise is used to manually generate (throw) an exception when a specific
+condition occurs.
+43. File Handling
+File Handling is the process of creating, reading, writing, and updating files in
+Python.
+
+-- 61 of 66 --
+
+44. Modules and Packages
+Module : A module is a Python file containing reusable code such as functions,
+classes, and variables. (e.g., calculator.py, main.py)
+Package : A package is a directory that contains multiple modules and helps
+organize related code (e.g., MyPackage -> __ init__.py , calculator.py,
+student.py, employee.py)
+45. Python Libraries
+A Python Library is a collection of modules that provide pre-written code to
+perform specific tasks.
+Why Use Libraries?
+
+-- 62 of 66 --
+
+Without libraries, you write everything from scratch.
+The library already provides the functionality.
+Common Python Libraries
+1. Math Library
+Used for mathematical operations.
+2. Random Library
+Used for random numbers.
+3. Datetime Library
+Used for date and time.
+
+-- 63 of 66 --
+
+4. OS Library
+Used for interacting with the operating system.
+5. NumPy
+Used for numerical computations.
+6. Pandas
+Used for data analysis.
+
+-- 64 of 66 --
+
+7. Matplotlib
+Used for graphs and charts.
+
+-- 65 of 66 --
+
+
+
+-- 66 of 66 --
+
