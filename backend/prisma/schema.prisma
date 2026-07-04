@@ -8,7 +8,11 @@ generator client {
 
 enum Role {
   USER
+  SUPER_ADMIN
   ADMIN
+  CONTENT_MANAGER
+  MODERATOR
+  SUPPORT_STAFF
 }
 
 enum Difficulty {
@@ -263,3 +267,33 @@ model UserDayProgress {
 
   @@unique([userId, dayId])
 }
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  adminId    String
+  adminEmail String
+  action     String   // e.g. "USER_CREATE", "PROGRESS_UNLOCK", "CONTENT_EDIT"
+  details    String   @db.Text
+  createdAt  DateTime @default(now())
+}
+
+model Announcement {
+  id        String   @id @default(uuid())
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  authorId  String
+}
+
+model SupportRequest {
+  id        String   @id @default(uuid())
+  userId    String?
+  name      String
+  email     String
+  subject   String
+  message   String   @db.Text
+  status    String   @default("PENDING") // "PENDING", "IN_PROGRESS", "RESOLVED"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+

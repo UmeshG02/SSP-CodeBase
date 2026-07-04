@@ -505,6 +505,7 @@ except Exception as e:
           id: tc.id,
           isSample: false,
           passed,
+          hasError: output.startsWith('ERR:') || output.startsWith('ERR '),
         };
       }
     });

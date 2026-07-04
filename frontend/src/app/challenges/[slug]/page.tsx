@@ -97,6 +97,37 @@ const renderMarkdown = (text: string, theme: 'dark' | 'light') => {
   });
 };
 
+const parseRuntimeError = (rawErr: string) => {
+  const clean = rawErr.replace(/^ERR:\s*/, '').trim();
+  
+  // Find error type
+  let type = 'Runtime Error';
+  const match = clean.match(/([a-zA-Z]+Error):/);
+  if (match) {
+    type = match[1];
+  } else if (clean.includes('Segmentation fault')) {
+    type = 'Segmentation Fault';
+  } else if (clean.includes('division by zero') || clean.includes('ZeroDivisionError')) {
+    type = 'Division By Zero';
+  } else if (clean.includes('SyntaxError')) {
+    type = 'SyntaxError';
+  }
+
+  // Find line number where it happened
+  let lineInfo = '';
+  const pyLineMatch = clean.match(/line\s+(\d+)/i);
+  if (pyLineMatch) {
+    lineInfo = `Line ${pyLineMatch[1]}`;
+  } else {
+    const jsLineMatch = clean.match(/:(\d+):\d+/);
+    if (jsLineMatch) {
+      lineInfo = `Line ${jsLineMatch[1]}`;
+    }
+  }
+
+  return { type, message: clean, lineInfo };
+};
+
 export default function ChallengeWorkspace({ params }: { params: Promise<Params> }) {
   const router = useRouter();
   const { slug } = use(params);
@@ -177,6 +208,25 @@ export default function ChallengeWorkspace({ params }: { params: Promise<Params>
     setOutput(null);
     setSelectedTestCaseIdx(0);
   }, [slug, router]);
+
+  const fetchAIHint = async () => {
+    setHintLoading(true);
+    try {
+      const data = await apiFetch(`/challenges/${slug}/hint`, {
+        method: 'POST',
+        body: { code, language }
+      });
+      if (data && data.hint) {
+        setAiHint(data.hint);
+      } else {
+        setAiHint('Try breaking the problem down into smaller helper functions and checking for boundary edge conditions.');
+      }
+    } catch (e) {
+      setAiHint('Consider using a dictionary or hash map to keep track of elements you have already visited. This can help reduce your time complexity.');
+    } finally {
+      setHintLoading(false);
+    }
+  };
 
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
@@ -439,7 +489,7 @@ export default function ChallengeWorkspace({ params }: { params: Promise<Params>
                       <span>AI Interview Hints</span>
                     </h4>
                     <button
-                      onClick={apiFetch}
+                      onClick={fetchAIHint}
                       disabled={hintLoading}
                       className="text-[10px] bg-indigo-600/15 hover:bg-indigo-600/25 border border-indigo-500/25 px-2.5 py-1 rounded text-indigo-400 font-bold transition-all cursor-pointer"
                     >
@@ -697,6 +747,41 @@ export default function ChallengeWorkspace({ params }: { params: Promise<Params>
                         if (!tc) return null;
 
                         if (tc.isSample) {
+                          if (tc.actual && (tc.actual.startsWith('ERR:') || tc.actual.startsWith('ERR '))) {
+                            const errDetail = parseRuntimeError(tc.actual);
+                            return (
+                              <div className={`p-4 rounded-xl border space-y-3 ${
+                                theme === 'light'
+                                  ? 'bg-rose-50 border-rose-250 text-rose-950 shadow-sm'
+                                  : 'bg-rose-950/20 border-rose-500/20 text-rose-200'
+                              }`}>
+                                <div className="flex items-center justify-between">
+                                  <h5 className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5 text-rose-500">
+                                    <AlertTriangle className="w-4 h-4" />
+                                    <span>{errDetail.type}</span>
+                                  </h5>
+                                  {errDetail.lineInfo && (
+                                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
+                                      theme === 'light' ? 'bg-rose-100 border-rose-200 text-rose-700' : 'bg-rose-950 border-rose-800 text-rose-300'
+                                    }`}>
+                                      {errDetail.lineInfo}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs font-semibold leading-normal font-sans">
+                                  The execution of your code encountered an exception:
+                                </p>
+                                <pre className={`p-3 rounded-lg text-xs font-mono overflow-auto max-h-[140px] border whitespace-pre-wrap select-text ${
+                                  theme === 'light'
+                                    ? 'bg-white border-rose-200 text-rose-900'
+                                    : 'bg-zinc-950 border-rose-950/50 text-rose-350'
+                                }`}>
+                                  {errDetail.message}
+                                </pre>
+                              </div>
+                            );
+                          }
+
                           return (
                             <div className="grid md:grid-cols-3 gap-3 text-xs font-mono">
                               <div className="space-y-1">
@@ -737,7 +822,7 @@ export default function ChallengeWorkspace({ params }: { params: Promise<Params>
                                 <p className="text-[10px] font-bold mt-2">
                                   Evaluation Result:{' '}
                                   <span className={tc.passed ? 'text-emerald-500' : 'text-rose-500'}>
-                                    {tc.passed ? 'Passed ✓' : 'Failed ✗'}
+                                    {tc.passed ? 'Passed ✓' : (tc.hasError ? 'Runtime Error ✗' : 'Wrong Answer ✗')}
                                   </span>
                                 </p>
                               </div>
