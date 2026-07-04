@@ -1985,50 +1985,6 @@ export default function AdminPortal() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-extrabold uppercase text-zinc-400">College</label>
-                  <input
-                    type="text"
-                    value={createUserForm.college}
-                    onChange={(e) => setCreateUserForm(prev => ({ ...prev, college: e.target.value }))}
-                    className={`w-full p-2.5 rounded-lg border text-xs outline-none ${
-                      theme === 'light' ? 'bg-zinc-50 border-zinc-200 text-zinc-955' : 'bg-zinc-950 border-zinc-800 text-white'
-                    }`}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-extrabold uppercase text-zinc-400">Company</label>
-                  <input
-                    type="text"
-                    value={createUserForm.company}
-                    onChange={(e) => setCreateUserForm(prev => ({ ...prev, company: e.target.value }))}
-                    className={`w-full p-2.5 rounded-lg border text-xs outline-none ${
-                      theme === 'light' ? 'bg-zinc-50 border-zinc-200 text-zinc-955' : 'bg-zinc-950 border-zinc-800 text-white'
-                    }`}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold uppercase text-zinc-400">Account Access Role</label>
-                <select
-                  value={createUserForm.role}
-                  onChange={(e) => setCreateUserForm(prev => ({ ...prev, role: e.target.value }))}
-                  className={`w-full p-2.5 rounded-lg border text-xs outline-none cursor-pointer ${
-                    theme === 'light' ? 'bg-zinc-50 border-zinc-200 text-zinc-955' : 'bg-zinc-950 border-zinc-800 text-white'
-                  }`}
-                >
-                  <option value="USER">User (Standard Student)</option>
-                  <option value="ADMIN">Admin (Manager)</option>
-                  <option value="SUPER_ADMIN">Super Admin (Owner)</option>
-                  <option value="CONTENT_MANAGER">Content Manager</option>
-                  <option value="MODERATOR">Moderator</option>
-                  <option value="SUPPORT_STAFF">Support Staff</option>
-                </select>
-              </div>
-
               <button
                 type="submit"
                 className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 transition-all rounded-xl text-white text-xs font-black tracking-wider uppercase cursor-pointer"
