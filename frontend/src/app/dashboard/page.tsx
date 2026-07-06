@@ -140,6 +140,17 @@ export default function Dashboard() {
             <span>SSP CodeBase</span>
           </Link>
           <div className="flex items-center gap-4">
+            <div className={`hidden sm:flex items-center gap-2 text-xs border-r pr-4 ${
+              theme === 'light' ? 'border-zinc-200 text-zinc-700' : 'border-zinc-800 text-zinc-300'
+            }`}>
+              <div className={`w-5 h-5 rounded-full flex items-center justify-center font-extrabold text-[10px] ${
+                theme === 'light' ? 'bg-indigo-50 text-indigo-600' : 'bg-indigo-950/40 text-indigo-400 border border-indigo-500/20'
+              }`}>
+                {profile?.name?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <span>Hi, <span className={`font-black ${theme === 'light' ? 'text-zinc-950' : 'text-white'}`}>{profile?.name}</span></span>
+            </div>
+            
             <div className="flex items-center gap-3 text-xs font-semibold">
               <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${
                 theme === 'light'
