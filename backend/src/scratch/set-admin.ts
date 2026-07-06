@@ -13,35 +13,29 @@ async function main() {
   const password = 'password123';
   const passwordHash = await bcrypt.hash(password, 10);
 
-  const existing = await prisma.user.findUnique({
+  // Delete to guarantee fresh state
+  await prisma.user.deleteMany({
     where: { email }
   });
 
-  if (existing) {
-    await prisma.user.update({
-      where: { email },
-      data: { role: Role.SUPER_ADMIN, passwordHash }
-    });
-    console.log(`Updated existing user ${email} to SUPER_ADMIN`);
-  } else {
-    await prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        role: Role.SUPER_ADMIN,
-        profile: {
-          create: {
-            name: 'Platform Administrator',
-            username: 'admin',
-            college: 'SSP Core',
-            expLevel: 'Expert',
-          }
-        },
-        streaks: { create: {} }
-      }
-    });
-    console.log(`Created new admin user: ${email} with password: ${password}`);
-  }
+  await prisma.user.create({
+    data: {
+      email,
+      passwordHash,
+      role: Role.SUPER_ADMIN,
+      profile: {
+        create: {
+          name: 'Platform Administrator',
+          username: 'admin',
+          college: 'SSP Core',
+          expLevel: 'Expert',
+        }
+      },
+      streaks: { create: {} }
+    }
+  });
+
+  console.log(`Successfully generated fresh SUPER_ADMIN user: ${email} with password: ${password}`);
 }
 
 main()
