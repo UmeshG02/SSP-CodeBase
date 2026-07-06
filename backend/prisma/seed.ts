@@ -1644,17 +1644,32 @@ Return string \`true\` or \`false\`.`,
     {
       title: 'TCS: Keyword Finder',
       slug: 'tcs-keyword-finder',
-      description: `# TCS NQT: Keyword Finder
-Write a function \`solve(word)\` that checks if a given string \`word\` is one of the standard Python keywords.
-The list of keywords to check against is: \`['if', 'else', 'while', 'for', 'def', 'class', 'return', 'import']\`.
+      description: `# TCS NQT | Past Placement Coding Paper (2025)
 
-Return \`"yes"\` if it is a keyword, and \`"no"\` otherwise.
+### Problem Description
+TCS NQT frequently evaluates a candidate's mastery over standard programming languages. One popular task is identifying reserved keywords in Python. 
 
-### Input Format
-A single string \`word\`.
+Given a string \`word\`, check if it matches any of the following 8 core Python keywords:
+\`if\`, \`else\`, \`while\`, \`for\`, \`def\`, \`class\`, \`return\`, \`import\`.
 
-### Output Format
-Return string \`"yes"\` or \`"no"\`.`,
+* Return \`"yes"\` if the string matches any keyword exactly.
+* Return \`"no"\` otherwise.
+
+---
+
+### Example Walkthrough
+1. **Input**: \`"if"\`
+   * **Analysis**: Matches the reserved keyword \`if\`.
+   * **Output**: \`"yes"\`
+2. **Input**: \`"hello"\`
+   * **Analysis**: Not a reserved keyword.
+   * **Output**: \`"no"\`
+
+---
+
+### Constraints
+* Length of word: $1 \\le \\text{length}(word) \\le 50$
+* Characters can be uppercase or lowercase, but Python keywords are case-sensitive. E.g., \`"If"\` is not a keyword.`,
       difficulty: Difficulty.EASY,
       points: 15,
       tags: ['TCS', 'MNC Exam', 'Previous Paper', '2025', 'Strings'],
@@ -1666,16 +1681,31 @@ Return string \`"yes"\` or \`"no"\`.`,
     {
       title: 'Wipro: Equilibrium Index',
       slug: 'wipro-equilibrium-index',
-      description: `# Wipro NLTH: Equilibrium Index
-Given a comma-separated string of integers (e.g. \`"1,2,3,4,6"\`), find the index where the sum of elements before it equals the sum of elements after it. 
+      description: `# Wipro Elite / NLTH | Past Placement Coding Paper (2024)
 
-Return the 0-based index if found, and \`-1\` otherwise.
+### Problem Description
+An **equilibrium index** of a sequence is an index such that the sum of elements at lower indices is equal to the sum of elements at higher indices. E.g., in an array $A$, index $i$ is equilibrium if:
+$$A[0] + A[1] + \\dots + A[i-1] = A[i+1] + A[i+2] + \\dots + A[n-1]$$
 
-### Input Format
-A single comma-separated string \`arr\`.
+Given a comma-separated string representation of integers (e.g. \`"1,2,3,4,6"\`), find the **first equilibrium index** (0-based).
+If no equilibrium index exists, return \`-1\`.
 
-### Output Format
-Return the 0-based index or \`-1\`.`,
+---
+
+### Example Walkthrough
+1. **Input**: \`"1,2,3,4,6"\`
+   * **Parse Array**: \`[1, 2, 3, 4, 6]\`
+   * **Check Index 3** (value 4):
+     * Sum of elements before index 3: $1 + 2 + 3 = 6$
+     * Sum of elements after index 3: $6$
+     * Since $6 = 6$, index 3 is the equilibrium index.
+   * **Output**: \`3\`
+
+---
+
+### Constraints
+* Number of array elements: $1 \\le N \\le 10^5$
+* Element values: $-10^4 \\le A[i] \\le 10^4$`,
       difficulty: Difficulty.MEDIUM,
       points: 20,
       tags: ['Wipro', 'MNC Exam', 'Previous Paper', '2024', 'Arrays'],
@@ -1697,14 +1727,30 @@ Return the 0-based index or \`-1\`.`,
     {
       title: 'Infosys: Unique Digit Pairs',
       slug: 'infosys-unique-digit-pairs',
-      description: `# Infosys HackWithInfy: Unique Digit Pairs
-Given a string containing comma-separated digits and a target sum separated by a pipe character (e.g., \`"1,3,2,4|5"\`), find the number of unique pairs of integers that sum up to the target.
+      description: `# Infosys HackWithInfy | Past Placement Coding Paper (2024)
 
-### Input Format
-A string of format \`"num1,num2,...|target"\`.
+### Problem Description
+During online coding assessments at Infosys, combinatorics and array searching are common themes. 
 
-### Output Format
-Return the number of unique pairs as an integer.`,
+Given a string containing a comma-separated list of digits and a target sum separated by a pipe character (e.g., \`"1,3,2,4|5"\`), find the number of **unique pairs** of integers in the list that sum up to the target.
+* Two pairs $(A, B)$ and $(C, D)$ are considered unique if their set values are different. E.g., $(1, 4)$ is the same as $(4, 1)$.
+
+---
+
+### Example Walkthrough
+1. **Input**: \`"1,3,2,4|5"\`
+   * **Array**: \`[1, 3, 2, 4]\`
+   * **Target**: \`5\`
+   * **Possible Pairs**:
+     * $(1, 4) \\rightarrow 1 + 4 = 5$
+     * $(3, 2) \\rightarrow 3 + 2 = 5$
+   * **Output**: \`2\`
+
+---
+
+### Constraints
+* Number of digits: $2 \\le N \\le 1000$
+* Target sum: $0 \\le \\text{target} \\le 100$`,
       difficulty: Difficulty.MEDIUM,
       points: 25,
       tags: ['Infosys', 'MNC Exam', 'Previous Paper', '2024', 'Hash Table'],
@@ -1734,19 +1780,32 @@ Return the number of unique pairs as an integer.`,
     {
       title: 'Accenture: Binary Operations',
       slug: 'accenture-binary-operations',
-      description: `# Accenture: Binary String Operations
-Given a string of alternating binary digits and alphabetical operators:
-* \`A\` represents AND
-* \`B\` represents OR
-* \`C\` represents XOR
+      description: `# Accenture | Past Placement Coding Paper (2024)
 
-Evaluate the expression from left to right. E.g. \`"1A0B1"\` evaluates to \`(1 AND 0) OR 1 = 1\`.
+### Problem Description
+Accenture's cognitive and technical assessments often include logic gate simulation.
 
-### Input Format
-A string \`str\` of alternating binary digits and letters.
+You are given a string of alternating binary digits and alphabetical operators:
+* \`A\` represents logical AND (\`&\`)
+* \`B\` represents logical OR (\`|\`)
+* \`C\` represents logical XOR (\`^\`)
 
-### Output Format
-Return \`1\` or \`0\`.`,
+Evaluate the expression from left to right and return the final bit (\`1\` or \`0\`).
+
+---
+
+### Example Walkthrough
+1. **Input**: \`"1A0B1"\`
+   * **Evaluation**:
+     * Step 1: \`1 AND 0\` = \`0\`
+     * Step 2: \`0 OR 1\` = \`1\`
+   * **Output**: \`1\`
+
+---
+
+### Constraints
+* The string length will be odd and contain valid operations.
+* String length: $3 \\le \\text{length} \\le 99$`,
       difficulty: Difficulty.EASY,
       points: 15,
       tags: ['Accenture', 'MNC Exam', 'Previous Paper', '2024', 'Bitwise'],
@@ -1769,14 +1828,25 @@ Return \`1\` or \`0\`.`,
     {
       title: 'Cognizant: Prime Ranges',
       slug: 'cognizant-prime-ranges',
-      description: `# Cognizant GenC: Prime Number Ranges
-Given a string with two integers separated by a comma \`"L,R"\`, count the number of prime numbers in the range \`[L, R]\` (inclusive).
+      description: `# Cognizant GenC | Past Placement Coding Paper (2023)
 
-### Input Format
-A string containing two comma-separated bounds \`L,R\`.
+### Problem Description
+A primary testing topic in Cognizant assessments is loops and prime number calculation.
 
-### Output Format
-Return the count of prime numbers as an integer.`,
+Given a string format \`"L,R"\` representing a range $[L, R]$, count how many prime numbers lie in the interval inclusive of $L$ and $R$.
+* A prime number is a natural number greater than 1 that has no positive divisors other than 1 and itself.
+
+---
+
+### Example Walkthrough
+1. **Input**: \`"10,20"\`
+   * **Primes in [10, 20]**: \`11, 13, 17, 19\`
+   * **Output**: \`4\`
+
+---
+
+### Constraints
+* $1 \\le L \\le R \\le 10^5$`,
       difficulty: Difficulty.MEDIUM,
       points: 20,
       tags: ['Cognizant', 'MNC Exam', 'Previous Paper', '2023', 'Math'],
@@ -1798,14 +1868,33 @@ Return the count of prime numbers as an integer.`,
     {
       title: 'Infosys: Grid Path Count',
       slug: 'infosys-grid-path-count',
-      description: `# Infosys HackWithInfy: Grid Path Count
-Write a function \`solve(n)\` that calculates the number of unique paths to reach the bottom-right corner from the top-left corner of an \`n x n\` grid. You can only move down or right.
+      description: `# Infosys HackWithInfy | Past Placement Coding Paper (2022)
 
-### Input Format
-A single integer \`n\`.
+### Problem Description
+Dynamic programming and grid manipulation are highly tested in Infosys Specialist Programmer and DSE roles.
 
-### Output Format
-Return the total unique paths as an integer.`,
+Given a grid size \`n\`, find the number of unique paths to travel from the top-left corner $(0,0)$ of an \`n x n\` grid to the bottom-right corner $(n-1, n-1)$. You can only move **Down** or **Right** at any point.
+
+---
+
+### Hint & Mathematical Approach
+This can be modeled mathematically as a combination. To go from $(0,0)$ to $(n-1, n-1)$ in an $n \\times n$ grid, you must take exactly $n-1$ down steps and $n-1$ right steps. 
+The total paths are:
+$$\\binom{2n - 2}{n - 1} = \\frac{(2n - 2)!}{(n - 1)! \\cdot (n - 1)!}$$
+
+---
+
+### Example Walkthrough
+1. **Input**: \`2\` (Grid of size 2x2)
+   * **Paths**:
+     1. Right $\\rightarrow$ Down
+     2. Down $\\rightarrow$ Right
+   * **Output**: \`2\`
+
+---
+
+### Constraints
+* $1 \\le n \\le 10$`,
       difficulty: Difficulty.HARD,
       points: 30,
       tags: ['Infosys', 'MNC Exam', 'Previous Paper', '2022', 'Dynamic Programming'],
@@ -1820,14 +1909,26 @@ Return the total unique paths as an integer.`,
     {
       title: 'TCS: Sweet Seventeen',
       slug: 'tcs-sweet-seventeen',
-      description: `# TCS NQT: Sweet Seventeen
-Given a string representing a base-17 number (with digits \`0-9\` and \`A-G\` representing values \`10-16\`), convert it to decimal.
+      description: `# TCS NQT | Past Placement Coding Paper (2022)
 
-### Input Format
-A single string \`str\` representing base-17.
+### Problem Description
+TCS NQT commonly tests numeric conversions and alternate base arithmetic.
 
-### Output Format
-Return the decimal value as an integer.`,
+Given a base-17 representation of a number, convert it to its decimal (base-10) equivalent.
+* Digits are \`0-9\` and alphabetical letters \`A-G\` (case-insensitive) representing values \`10-16\` respectively:
+  * \`A\` = 10, \`B\` = 11, \`C\` = 12, \`D\` = 13, \`E\` = 14, \`F\` = 15, \`G\` = 16.
+
+---
+
+### Example Walkthrough
+1. **Input**: \`"1A"\`
+   * **Calculation**: $1 \\times 17^1 + 10 \\times 17^0 = 17 + 10 = 27$.
+   * **Output**: \`27\`
+
+---
+
+### Constraints
+* Input string length: $1 \\le \\text{length} \\le 10$`,
       difficulty: Difficulty.EASY,
       points: 15,
       tags: ['TCS', 'MNC Exam', 'Previous Paper', '2022', 'Math'],
@@ -1842,14 +1943,33 @@ Return the decimal value as an integer.`,
     {
       title: 'Wipro: Perfect Squares Sum',
       slug: 'wipro-perfect-squares-sum',
-      description: `# Wipro Elite: Perfect Squares Sum
-Write a function \`solve(n)\` that computes the sum of squares of integers from 1 up to \`n\`. Return \`"even"\` if the sum is even, and \`"odd"\` otherwise.
+      description: `# Wipro Elite | Past Placement Coding Paper (2021)
 
-### Input Format
-A single integer \`n\`.
+### Problem Description
+A classic logic assessment query in Wipro NLTH tests series summation properties.
 
-### Output Format
-Return string \`"even"\` or \`"odd"\`.`,
+Given a positive integer \`n\`, calculate the sum of perfect squares of all integers from 1 up to \`n\`:
+$$\\text{Sum} = 1^2 + 2^2 + 3^2 + \\dots + n^2$$
+Return \`"even"\` if the sum is an even number, and \`"odd"\` otherwise.
+
+---
+
+### Hint & Mathematical Formula
+The sum of squares of first $n$ natural numbers is given by:
+$$\\text{Sum} = \\frac{n(n + 1)(2n + 1)}{6}$$
+
+---
+
+### Example Walkthrough
+1. **Input**: \`3\`
+   * **Calculation**: $1^2 + 2^2 + 3^2 = 1 + 4 + 9 = 14$.
+   * **Checking parity**: 14 is even.
+   * **Output**: \`"even"\`
+
+---
+
+### Constraints
+* $1 \\le n \\le 10^5$`,
       difficulty: Difficulty.EASY,
       points: 15,
       tags: ['Wipro', 'MNC Exam', 'Previous Paper', '2021', 'Math'],
