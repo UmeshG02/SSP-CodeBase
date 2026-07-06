@@ -284,6 +284,33 @@ export default function AdminPortal() {
     }
   };
 
+  // Toggle explicit access-key module unlock for a user
+  const handleToggleModuleAccess = async (moduleNumber: number, currentHasAccess: boolean) => {
+    if (!selectedUser) return;
+    try {
+      const endpoint = currentHasAccess 
+        ? `/admin/users/${selectedUser.id}/revoke-module-access` 
+        : `/admin/users/${selectedUser.id}/grant-module-access`;
+      
+      await apiFetch(endpoint, {
+        method: 'POST',
+        body: { moduleNumber }
+      });
+      
+      triggerToast('success', `${currentHasAccess ? 'Revoked' : 'Granted'} access key unlock for Module ${moduleNumber}`);
+      fetchUsers();
+      
+      // Update selectedUser local list
+      setSelectedUser((prev: any) => {
+        const list = prev.unlockedWeeks || [];
+        const nextList = currentHasAccess ? list.filter((m: number) => m !== moduleNumber) : [...list, moduleNumber];
+        return { ...prev, unlockedWeeks: nextList };
+      });
+    } catch (err: any) {
+      triggerToast('error', err.message || 'Access key toggle failed');
+    }
+  };
+
   // Grant coins / XP
   const handleGrantReward = async (rewardType: 'xp' | 'coins', val: number) => {
     if (!selectedUser) return;
@@ -1319,6 +1346,46 @@ export default function AdminPortal() {
                         >
                           Lock Current
                         </button>
+                      </div>
+                    </div>
+                    
+                    {/* User-Specific Module Key Overrides */}
+                    <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-900 space-y-3 md:col-span-4">
+                      <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Individual Module Key Access Overrides (Key Unlock)</h4>
+                      <p className="text-[10px] text-zinc-500 leading-normal">
+                        Check modules to explicitly grant this user access by module key. This unlocks the module uniquely for this user, separate from sequential progress rules.
+                      </p>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-1 text-zinc-300 font-mono">
+                        {[1, 2, 3, 4, 5, 6, 7].map(num => {
+                          const isExplicit = selectedUser.unlockedWeeks && selectedUser.unlockedWeeks.includes(num);
+                          const isSequential = selectedUser.currentModule >= num;
+                          const isUnlocked = isExplicit || isSequential;
+                          
+                          return (
+                            <label 
+                              key={num} 
+                              className={`p-2.5 rounded-lg border flex items-center justify-between gap-2 cursor-pointer transition-colors ${
+                                isExplicit
+                                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                  : isSequential
+                                    ? 'bg-zinc-800/40 border-zinc-700/50 text-zinc-500'
+                                    : 'bg-zinc-950 border-zinc-900 text-zinc-600 hover:border-zinc-800'
+                              }`}
+                            >
+                              <div className="flex flex-col">
+                                <span className="text-[10px] font-bold">Module {num}</span>
+                                <span className="text-[8px] font-mono text-zinc-500">Key: module-{num}-key</span>
+                              </div>
+                              <input
+                                type="checkbox"
+                                checked={isUnlocked}
+                                disabled={isSequential}
+                                onChange={() => handleToggleModuleAccess(num, isExplicit)}
+                                className="rounded border-zinc-800 text-indigo-600 focus:ring-0 w-3.5 h-3.5 cursor-pointer disabled:cursor-not-allowed"
+                              />
+                            </label>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>

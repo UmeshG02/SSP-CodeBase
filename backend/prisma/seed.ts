@@ -291,6 +291,7 @@ async function main() {
         pathId: path.id,
         title: weekTopics[wIdx].title,
         weekNumber: wIdx + 1,
+        accessKey: `module-${wIdx + 1}-key`,
       }
     });
 

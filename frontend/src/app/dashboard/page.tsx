@@ -274,12 +274,50 @@ export default function Dashboard() {
 
             {/* Weekly Problems List (Locks Evaluator) */}
             {!isWeekUnlocked ? (
-              <div className={`p-12 text-center rounded-xl border flex flex-col items-center justify-center space-y-3 ${
+              <div className={`p-12 text-center rounded-xl border flex flex-col items-center justify-center space-y-4 ${
                 theme === 'light' ? 'bg-zinc-50 border-zinc-200' : 'bg-zinc-900/50 border-zinc-850'
               }`}>
                 <Lock className={`w-8 h-8 ${theme === 'light' ? 'text-zinc-400' : 'text-zinc-600'}`} />
                 <h4 className={`text-sm font-bold ${theme === 'light' ? 'text-zinc-850' : 'text-white'}`}>Module Locked</h4>
                 <p className="text-xs text-zinc-500 max-w-sm">Complete all coding challenges in the previous modules to unlock this module.</p>
+                
+                <div className="w-8 h-px bg-zinc-800 my-2" />
+                
+                <form 
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const keyInput = (e.target as any).elements.accessKey.value;
+                    if (!keyInput) return;
+                    try {
+                      const res = await apiFetch('/roadmap/unlock-with-key', {
+                        method: 'POST',
+                        body: { key: keyInput }
+                      });
+                      if (res.success) {
+                        alert(`Successfully unlocked "${res.title}" with access key!`);
+                        window.location.reload();
+                      }
+                    } catch (err: any) {
+                      alert(err.message || 'Invalid key.');
+                    }
+                  }}
+                  className="w-full max-w-xs space-y-2"
+                >
+                  <input
+                    type="text"
+                    name="accessKey"
+                    placeholder="Enter Module Access Key..."
+                    className={`w-full px-3 py-2 text-xs rounded-lg border text-center outline-none ${
+                      theme === 'light' ? 'bg-white border-zinc-300 text-zinc-950 focus:border-indigo-500' : 'bg-zinc-950 border-zinc-800 text-white focus:border-indigo-500'
+                    }`}
+                  />
+                  <button
+                    type="submit"
+                    className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 transition-all text-xs font-bold rounded-lg text-white cursor-pointer"
+                  >
+                    Unlock Module with Key
+                  </button>
+                </form>
               </div>
             ) : problemsLoading ? (
               <div className="py-12 flex justify-center">

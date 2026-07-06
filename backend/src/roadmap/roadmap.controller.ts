@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, UseGuards, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Param, UseGuards, UseInterceptors, UploadedFile, BadRequestException, Body } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RoadmapService } from './roadmap.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -45,5 +45,13 @@ export class RoadmapController {
       throw new BadRequestException('Please provide a valid PDF file.');
     }
     return this.roadmapService.parsePdfAndGenerateRoadmap(file.buffer);
+  }
+
+  @Post('unlock-with-key')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Unlock a specific module/week using an access key' })
+  async unlockWeekWithKey(@CurrentUser() user: any, @Body('key') key: string) {
+    return this.roadmapService.unlockWeekWithKey(user.id, key);
   }
 }

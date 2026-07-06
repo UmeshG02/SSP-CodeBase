@@ -181,7 +181,8 @@ export class AdminController {
       longestStreak: u.streaks?.longestStreak || 0,
       submissionsCount: u._count.submissions,
       currentModule: u.learningProgress[0]?.currentWeek || 1,
-      currentDay: u.learningProgress[0]?.currentDay || 1
+      currentDay: u.learningProgress[0]?.currentDay || 1,
+      unlockedWeeks: u.learningProgress[0]?.unlockedWeeks || []
     }));
   }
 
@@ -399,6 +400,68 @@ export class AdminController {
     }
 
     await this.logAction(admin, 'LOCK_MODULE', { userId: id, moduleNumber });
+    return { success: true };
+  }
+
+  @Post('users/:id/grant-module-access')
+  async grantModuleAccess(@CurrentUser() admin: any, @Param('id') id: string, @Body('moduleNumber') moduleNumber: number) {
+    if (!moduleNumber) throw new BadRequestException('Module number required');
+
+    const path = await this.prisma.learningPath.findUnique({
+      where: { slug: 'python-programming-journey' }
+    });
+    if (!path) throw new NotFoundException('Python path not found');
+
+    let userProgress = await this.prisma.userProgress.findUnique({
+      where: { userId_pathId: { userId: id, pathId: path.id } }
+    });
+
+    if (!userProgress) {
+      userProgress = await this.prisma.userProgress.create({
+        data: {
+          userId: id,
+          pathId: path.id,
+          currentWeek: 1,
+          currentDay: 1,
+          unlockedWeeks: [moduleNumber]
+        }
+      });
+    } else {
+      if (!userProgress.unlockedWeeks.includes(moduleNumber)) {
+        const updated = [...userProgress.unlockedWeeks, moduleNumber];
+        await this.prisma.userProgress.update({
+          where: { id: userProgress.id },
+          data: { unlockedWeeks: updated }
+        });
+      }
+    }
+
+    await this.logAction(admin, 'GRANT_MODULE_ACCESS', { userId: id, moduleNumber });
+    return { success: true };
+  }
+
+  @Post('users/:id/revoke-module-access')
+  async revokeModuleAccess(@CurrentUser() admin: any, @Param('id') id: string, @Body('moduleNumber') moduleNumber: number) {
+    if (!moduleNumber) throw new BadRequestException('Module number required');
+
+    const path = await this.prisma.learningPath.findUnique({
+      where: { slug: 'python-programming-journey' }
+    });
+    if (!path) throw new NotFoundException('Python path not found');
+
+    const userProgress = await this.prisma.userProgress.findUnique({
+      where: { userId_pathId: { userId: id, pathId: path.id } }
+    });
+
+    if (userProgress) {
+      const updated = userProgress.unlockedWeeks.filter(m => m !== moduleNumber);
+      await this.prisma.userProgress.update({
+        where: { id: userProgress.id },
+        data: { unlockedWeeks: updated }
+      });
+    }
+
+    await this.logAction(admin, 'REVOKE_MODULE_ACCESS', { userId: id, moduleNumber });
     return { success: true };
   }
 

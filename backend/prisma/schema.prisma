@@ -227,6 +227,7 @@ model Week {
   title      String
   weekNumber Int
   days       Day[]
+  accessKey  String?
 }
 
 model Day {
@@ -241,13 +242,14 @@ model Day {
 }
 
 model UserProgress {
-  id          String       @id @default(uuid())
-  userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pathId      String
-  path        LearningPath @relation(fields: [pathId], references: [id], onDelete: Cascade)
-  currentWeek Int          @default(1)
-  currentDay  Int          @default(1)
+  id            String       @id @default(uuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pathId        String
+  path          LearningPath @relation(fields: [pathId], references: [id], onDelete: Cascade)
+  currentWeek   Int          @default(1)
+  currentDay    Int          @default(1)
+  unlockedWeeks Int[]
 
   @@unique([userId, pathId])
 }

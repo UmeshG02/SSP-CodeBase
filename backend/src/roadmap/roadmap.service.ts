@@ -69,7 +69,10 @@ export class RoadmapService {
         // - It's Week 1 Day 1 (previousDayCompleted starts as true)
         // - OR the user has solved the previous day
         // - OR the user's progress record explicitly places them at or past this day
+        const isModuleExplicitlyUnlocked = userProgress.unlockedWeeks && userProgress.unlockedWeeks.includes(week.weekNumber);
+
         const unlocked = previousDayCompleted || 
+          isModuleExplicitlyUnlocked ||
           (week.weekNumber < userProgress.currentWeek) ||
           (week.weekNumber === userProgress.currentWeek && day.dayNumber <= userProgress.currentDay);
 
@@ -144,7 +147,9 @@ export class RoadmapService {
     let isUnlocked = isFirstDay;
 
     if (userProgress) {
+      const isModuleExplicitlyUnlocked = userProgress.unlockedWeeks && userProgress.unlockedWeeks.includes(day.week.weekNumber);
       isUnlocked = isFirstDay || 
+        isModuleExplicitlyUnlocked ||
         (day.week.weekNumber < userProgress.currentWeek) ||
         (day.week.weekNumber === userProgress.currentWeek && day.dayNumber <= userProgress.currentDay);
     }
@@ -324,5 +329,52 @@ export class RoadmapService {
     }
 
     return path;
+  }
+
+  async unlockWeekWithKey(userId: string, key: string) {
+    if (!key || typeof key !== 'string') {
+      throw new BadRequestException('Access key is required.');
+    }
+
+    const cleanKey = key.trim();
+
+    const week = await this.prisma.week.findFirst({
+      where: { accessKey: cleanKey },
+      include: { path: true }
+    });
+
+    if (!week) {
+      throw new NotFoundException('Invalid Module access key.');
+    }
+
+    let userProgress = await this.prisma.userProgress.findUnique({
+      where: { userId_pathId: { userId, pathId: week.pathId } }
+    });
+
+    if (!userProgress) {
+      userProgress = await this.prisma.userProgress.create({
+        data: {
+          userId,
+          pathId: week.pathId,
+          currentWeek: 1,
+          currentDay: 1,
+          unlockedWeeks: []
+        }
+      });
+    }
+
+    if (!userProgress.unlockedWeeks.includes(week.weekNumber)) {
+      const updatedUnlocked = [...userProgress.unlockedWeeks, week.weekNumber];
+      await this.prisma.userProgress.update({
+        where: { id: userProgress.id },
+        data: { unlockedWeeks: updatedUnlocked }
+      });
+    }
+
+    return {
+      success: true,
+      title: week.title,
+      weekNumber: week.weekNumber
+    };
   }
 }
