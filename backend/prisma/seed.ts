@@ -1318,16 +1318,21 @@ async function main() {
           difficulty: Difficulty.EASY,
           points: 15,
           tags: ['Libraries'],
-          t1: 'int score',
+          t1: 'string json_str',
           t2: 'String',
-          desc: 'Deserialize a JSON string \'{"score": score}\' and return "Passed" if score >= 50, and "Failed" otherwise.',
-          s0_in: '75',
+          desc: 'Write a function `solve(json_str)` that takes a JSON string of format `{"score": int}`, deserializes it using standard JSON libraries, and returns `"Passed"` if the score is greater than or equal to 50, and `"Failed"` otherwise.',
+          s0_in: '\'{"score": 75}\'',
           s0_out: 'Passed',
-          s0_exp: '75 >= 50, so passes.',
-          s1_in: '20',
+          s0_exp: 'Deserializing \'{"score": 75}\' gives a score of 75, which is >= 50, so return "Passed".',
+          s1_in: '\'{"score": 20}\'',
           s1_out: 'Failed',
-          s1_exp: '20 < 50, so fails.',
-          fn: (s: number) => s >= 50 ? 'Passed' : 'Failed'
+          s1_exp: 'Deserializing \'{"score": 20}\' gives a score of 20, which is < 50, so return "Failed".',
+          testInputs: ["'{\\\"score\\\": 75}'", "'{\\\"score\\\": 20}'", "'{\\\"score\\\": 50}'", "'{\\\"score\\\": 49}'", "'{\\\"score\\\": 99}'"],
+          fn: (str: string) => {
+            const match = str.match(/\d+/);
+            const score = match ? parseInt(match[0]) : 0;
+            return score >= 50 ? 'Passed' : 'Failed';
+          }
         },
         {
           title: 'Datetime Day Difference',
@@ -1528,10 +1533,10 @@ ${tmpl.s1_exp}`;
           outputFormat: 'Evaluated response',
           templateCode: JSON.stringify({
             javascript: 'function solve(x) {\n  // Write your code here\n}',
-            typescript: 'function solve(x: number): any {\n  // Write your code here\n}',
+            typescript: `function solve(x: ${tmpl.t1.startsWith('string') ? 'string' : 'number'}): any {\n  // Write your code here\n}`,
             python: 'def solve(x):\n    # Write your code here\n    pass',
-            java: `class Solution {\n    public ${tmpl.t2 === 'int' ? 'int' : 'String'} solve(int x) {\n        // Write your code here\n        return ${tmpl.t2 === 'int' ? '0' : '""'};\n    }\n}`,
-            cpp: `class Solution {\npublic:\n    ${tmpl.t2 === 'int' ? 'int' : 'string'} solve(int x) {\n        // Write your code here\n        return ${tmpl.t2 === 'int' ? '0' : '""'};\n    }\n};`
+            java: `class Solution {\n    public ${tmpl.t2 === 'int' ? 'int' : 'String'} solve(${tmpl.t1.startsWith('string') ? 'String' : 'int'} x) {\n        // Write your code here\n        return ${tmpl.t2 === 'int' ? '0' : '""'};\n    }\n}`,
+            cpp: `class Solution {\npublic:\n    ${tmpl.t2 === 'int' ? 'int' : 'string'} solve(${tmpl.t1.startsWith('string') ? 'string' : 'int'} x) {\n        // Write your code here\n        return ${tmpl.t2 === 'int' ? '0' : '""'};\n    }\n};`
           })
         }
       });
