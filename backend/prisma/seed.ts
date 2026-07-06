@@ -115,173 +115,211 @@ async function main() {
     { title: 'Module 7: Standard Python Libraries', topic: 'Python Libraries' }
   ];
 
-  const codingTemplates = [
-    // 5 Easy (Indices 0 - 4)
-    {
-      title: 'Basic Sum',
-      difficulty: Difficulty.EASY,
-      points: 10,
-      tags: ['Variables', 'Basic Math'],
-      fn: (x: number) => x + 10,
-      t1: 'int x',
-      t2: 'int',
-      desc: 'Write a function `solve(x)` that takes an integer `x` and returns `x + 10`.',
-      s0_in: '5',
-      s0_out: '15',
-      s0_exp: 'For x = 5, the result is 5 + 10 = 15.',
-      s1_in: '12',
-      s1_out: '22',
-      s1_exp: 'For x = 12, the result is 12 + 10 = 22.'
-    },
-    {
-      title: 'Parity Identifier',
-      difficulty: Difficulty.EASY,
-      points: 10,
-      tags: ['Conditionals'],
-      fn: (x: number) => x % 2 === 0 ? 'even' : 'odd',
-      t1: 'int x',
-      t2: 'String',
-      desc: 'Write a function `solve(x)` that returns `"even"` if `x` is even, and `"odd"` otherwise.',
-      s0_in: '4',
-      s0_out: '"even"',
-      s0_exp: 'Since 4 is divisible by 2, it is even.',
-      s1_in: '7',
-      s1_out: '"odd"',
-      s1_exp: 'Since 7 is not divisible by 2, it is odd.'
-    },
-    {
-      title: 'Value Tripler',
-      difficulty: Difficulty.EASY,
-      points: 10,
-      tags: ['Basic Math'],
-      fn: (x: number) => x * 3,
-      t1: 'int x',
-      t2: 'int',
-      desc: 'Write a function `solve(x)` that returns the value `x * 3`.',
-      s0_in: '3',
-      s0_out: '9',
-      s0_exp: 'For x = 3, the result is 3 * 3 = 9.',
-      s1_in: '10',
-      s1_out: '30',
-      s1_exp: 'For x = 10, the result is 10 * 3 = 30.'
-    },
-    {
-      title: 'Simple Multiplier',
-      difficulty: Difficulty.EASY,
-      points: 15,
-      tags: ['Basic Math'],
-      fn: (x: number) => x * 5,
-      t1: 'int x',
-      t2: 'int',
-      desc: 'Write a function `solve(x)` that returns `x * 5`.',
-      s0_in: '4',
-      s0_out: '20',
-      s0_exp: 'For x = 4, the result is 4 * 5 = 20.',
-      s1_in: '10',
-      s1_out: '50',
-      s1_exp: 'For x = 10, the result is 10 * 5 = 50.'
-    },
-    {
-      title: 'Limit Validation',
-      difficulty: Difficulty.EASY,
-      points: 15,
-      tags: ['Conditionals'],
-      fn: (x: number) => x >= 50 ? 'true' : 'false',
-      t1: 'int x',
-      t2: 'String',
-      desc: 'Write a function `solve(x)` that returns the string `"true"` if `x` is 50 or above, and `"false"` otherwise.',
-      s0_in: '60',
-      s0_out: '"true"',
-      s0_exp: 'Since 60 is greater than or equal to 50, it returns "true".',
-      s1_in: '30',
-      s1_out: '"false"',
-      s1_exp: 'Since 30 is less than 50, it returns "false".'
-    },
-    
-    // 3 Medium (Indices 5 - 7)
-    {
-      title: 'Square Progression',
-      difficulty: Difficulty.MEDIUM,
-      points: 20,
-      tags: ['Math'],
-      fn: (x: number) => x * x,
-      t1: 'int x',
-      t2: 'int',
-      desc: 'Write a function `solve(x)` that returns the square of the value `x`.',
-      s0_in: '5',
-      s0_out: '25',
-      s0_exp: 'The square of 5 is 5 * 5 = 25.',
-      s1_in: '8',
-      s1_out: '64',
-      s1_exp: 'The square of 8 is 8 * 8 = 64.'
-    },
-    {
-      title: 'Divisibility Checker',
-      difficulty: Difficulty.MEDIUM,
-      points: 20,
-      tags: ['Loops'],
-      fn: (x: number) => x % 5 === 0 ? 1 : 0,
-      t1: 'int x',
-      t2: 'int',
-      desc: 'Write a function `solve(x)` that returns `1` if `x` is divisible by 5, and `0` otherwise.',
-      s0_in: '15',
-      s0_out: '1',
-      s0_exp: 'Since 15 is divisible by 5, the function returns 1.',
-      s1_in: '12',
-      s1_out: '0',
-      s1_exp: 'Since 12 is not divisible by 5, the function returns 0.'
-    },
-    {
-      title: 'Sum Accumulator',
-      difficulty: Difficulty.MEDIUM,
-      points: 25,
-      tags: ['Basic Math'],
-      fn: (x: number) => (x * (x + 1)) / 2,
-      t1: 'int x',
-      t2: 'int',
-      desc: 'Write a function `solve(x)` that returns the sum of numbers from 1 to `x`.',
-      s0_in: '4',
-      s0_out: '10',
-      s0_exp: 'Sum of integers from 1 to 4 is 1 + 2 + 3 + 4 = 10.',
-      s1_in: '5',
-      s1_out: '15',
-      s1_exp: 'Sum of integers from 1 to 5 is 1 + 2 + 3 + 4 + 5 = 15.'
-    },
-    
-    // 2 Hard (Indices 8 - 9)
-    {
-      title: 'Cube Boundary',
-      difficulty: Difficulty.HARD,
-      points: 30,
-      tags: ['Math'],
-      fn: (x: number) => x * x * x,
-      t1: 'int x',
-      t2: 'int',
-      desc: 'Write a function `solve(x)` that returns the cube of the value `x`.',
-      s0_in: '3',
-      s0_out: '27',
-      s0_exp: 'The cube of 3 is 3 * 3 * 3 = 27.',
-      s1_in: '4',
-      s1_out: '64',
-      s1_exp: 'The cube of 4 is 4 * 4 * 4 = 64.'
-    },
-    {
-      title: 'Fibonacci Bounds',
-      difficulty: Difficulty.HARD,
-      points: 30,
-      tags: ['Recursion', 'Math'],
-      fn: (x: number) => x <= 1 ? x : x - 1,
-      t1: 'int x',
-      t2: 'int',
-      desc: 'Write a function `solve(x)` that returns a calculated Fibonacci check bounds for value `x`.',
-      s0_in: '1',
-      s0_out: '1',
-      s0_exp: 'Since x <= 1, it returns x = 1.',
-      s1_in: '5',
-      s1_out: '4',
-      s1_exp: 'Based on custom bounds sequence, it returns 5 - 1 = 4.'
+  function getWeekCategory(wIdx: number): string {
+    const cats = ['Basic', 'Structure', 'Logic', 'Function', 'Object', 'IO', 'Library'];
+    return cats[wIdx] || 'General';
+  }
+
+  function getWeekTag(wIdx: number): string {
+    const tags = ['Variables', 'DataTypes', 'Conditionals', 'Functions', 'OOP', 'FileIO', 'Libraries'];
+    return tags[wIdx] || 'General';
+  }
+
+  function getDynamicTemplate(tmplIdx: number, wIdx: number) {
+    const wNum = wIdx + 1;
+
+    if (tmplIdx === 0) {
+      const addVal = wNum * 10;
+      return {
+        title: `${getWeekCategory(wIdx)} Sum`,
+        difficulty: Difficulty.EASY,
+        points: 10,
+        tags: [getWeekTag(wIdx), 'Math'],
+        t1: 'int x',
+        t2: 'int',
+        desc: `Write a function \`solve(x)\` that takes an integer \`x\` and returns \`x + ${addVal}\`.`,
+        s0_in: '5',
+        s0_out: String(5 + addVal),
+        s0_exp: `For x = 5, the result is 5 + ${addVal} = ${5 + addVal}.`,
+        s1_in: '12',
+        s1_out: String(12 + addVal),
+        s1_exp: `For x = 12, the result is 12 + ${addVal} = ${12 + addVal}.`,
+        fn: (x: number) => x + addVal
+      };
     }
-  ];
+    else if (tmplIdx === 1) {
+      const div = wNum + 1;
+      return {
+        title: `${getWeekCategory(wIdx)} Divisibility`,
+        difficulty: Difficulty.EASY,
+        points: 10,
+        tags: [getWeekTag(wIdx)],
+        t1: 'int x',
+        t2: 'String',
+        desc: `Write a function \`solve(x)\` that returns \`"yes"\` if \`x\` is divisible by ${div}, and \`"no"\` otherwise.`,
+        s0_in: String(div * 2),
+        s0_out: '"yes"',
+        s0_exp: `Since ${div * 2} is divisible by ${div}, it returns "yes".`,
+        s1_in: String(div * 2 + 1),
+        s1_out: '"no"',
+        s1_exp: `Since ${div * 2 + 1} is not divisible by ${div}, it returns "no".`,
+        fn: (x: number) => x % div === 0 ? "yes" : "no"
+      };
+    }
+    else if (tmplIdx === 2) {
+      const factor = wNum + 2;
+      return {
+        title: `${getWeekCategory(wIdx)} Scale`,
+        difficulty: Difficulty.EASY,
+        points: 10,
+        tags: [getWeekTag(wIdx)],
+        t1: 'int x',
+        t2: 'int',
+        desc: `Write a function \`solve(x)\` that returns \`x * ${factor}\`.`,
+        s0_in: '3',
+        s0_out: String(3 * factor),
+        s0_exp: `For x = 3, the result is 3 * ${factor} = ${3 * factor}.`,
+        s1_in: '10',
+        s1_out: String(10 * factor),
+        s1_exp: `For x = 10, the result is 10 * ${factor} = ${10 * factor}.`,
+        fn: (x: number) => x * factor
+      };
+    }
+    else if (tmplIdx === 3) {
+      const mult = wNum + 4;
+      return {
+        title: `${getWeekCategory(wIdx)} Multiplier`,
+        difficulty: Difficulty.EASY,
+        points: 15,
+        tags: [getWeekTag(wIdx)],
+        t1: 'int x',
+        t2: 'int',
+        desc: `Write a function \`solve(x)\` that returns \`x * ${mult}\`.`,
+        s0_in: '4',
+        s0_out: String(4 * mult),
+        s0_exp: `For x = 4, the result is 4 * ${mult} = ${4 * mult}.`,
+        s1_in: '10',
+        s1_out: String(10 * mult),
+        s1_exp: `For x = 10, the result is 10 * ${mult} = ${10 * mult}.`,
+        fn: (x: number) => x * mult
+      };
+    }
+    else if (tmplIdx === 4) {
+      const limit = wNum * 10 + 20;
+      return {
+        title: `${getWeekCategory(wIdx)} Threshold`,
+        difficulty: Difficulty.EASY,
+        points: 15,
+        tags: [getWeekTag(wIdx)],
+        t1: 'int x',
+        t2: 'String',
+        desc: `Write a function \`solve(x)\` that returns the string \`"true"\` if \`x\` is ${limit} or above, and \`"false"\` otherwise.`,
+        s0_in: String(limit + 10),
+        s0_out: '"true"',
+        s0_exp: `Since ${limit + 10} is greater than or equal to ${limit}, it returns "true".`,
+        s1_in: String(limit - 10),
+        s1_out: '"false"',
+        s1_exp: `Since ${limit - 10} is less than ${limit}, it returns "false".`,
+        fn: (x: number) => x >= limit ? "true" : "false"
+      };
+    }
+    else if (tmplIdx === 5) {
+      const addConst = wNum;
+      return {
+        title: `${getWeekCategory(wIdx)} Square`,
+        difficulty: Difficulty.MEDIUM,
+        points: 20,
+        tags: [getWeekTag(wIdx)],
+        t1: 'int x',
+        t2: 'int',
+        desc: `Write a function \`solve(x)\` that returns the square of the value \`x\` plus ${addConst} (i.e. \`x * x + ${addConst}\`).`,
+        s0_in: '5',
+        s0_out: String(5 * 5 + addConst),
+        s0_exp: `For x = 5, the result is 5 * 5 + ${addConst} = ${25 + addConst}.`,
+        s1_in: '8',
+        s1_out: String(8 * 8 + addConst),
+        s1_exp: `For x = 8, the result is 8 * 8 + ${addConst} = ${64 + addConst}.`,
+        fn: (x: number) => x * x + addConst
+      };
+    }
+    else if (tmplIdx === 6) {
+      const modVal = wNum + 2;
+      return {
+        title: `${getWeekCategory(wIdx)} Check`,
+        difficulty: Difficulty.MEDIUM,
+        points: 20,
+        tags: [getWeekTag(wIdx)],
+        t1: 'int x',
+        t2: 'int',
+        desc: `Write a function \`solve(x)\` that returns \`1\` if \`x\` is divisible by ${modVal}, and \`0\` otherwise.`,
+        s0_in: String(modVal * 2),
+        s0_out: '1',
+        s0_exp: `Since ${modVal * 2} is divisible by ${modVal}, it returns 1.`,
+        s1_in: String(modVal * 2 + 1),
+        s1_out: '0',
+        s1_exp: `Since ${modVal * 2 + 1} is not divisible by ${modVal}, it returns 0.`,
+        fn: (x: number) => x % modVal === 0 ? 1 : 0
+      };
+    }
+    else if (tmplIdx === 7) {
+      const shift = wNum;
+      const compute = (x: number) => ((x * (x + 1)) / 2) + shift;
+      return {
+        title: `${getWeekCategory(wIdx)} Series`,
+        difficulty: Difficulty.MEDIUM,
+        points: 25,
+        tags: [getWeekTag(wIdx)],
+        t1: 'int x',
+        t2: 'int',
+        desc: `Write a function \`solve(x)\` that returns the sum of numbers from 1 up to \`x\`, plus ${shift}.`,
+        s0_in: '4',
+        s0_out: String(compute(4)),
+        s0_exp: `For x = 4, the sum is 10 + ${shift} = ${compute(4)}.`,
+        s1_in: '5',
+        s1_out: String(compute(5)),
+        s1_exp: `For x = 5, the sum is 15 + ${shift} = ${compute(5)}.`,
+        fn: (x: number) => ((x * (x + 1)) / 2) + shift
+      };
+    }
+    else if (tmplIdx === 8) {
+      const offset = wNum;
+      return {
+        title: `${getWeekCategory(wIdx)} Power`,
+        difficulty: Difficulty.HARD,
+        points: 30,
+        tags: [getWeekTag(wIdx)],
+        t1: 'int x',
+        t2: 'int',
+        desc: `Write a function \`solve(x)\` that returns the cube of \`x\` plus ${offset} (i.e. \`x * x * x + ${offset}\`).`,
+        s0_in: '3',
+        s0_out: String(3 * 3 * 3 + offset),
+        s0_exp: `For x = 3, the result is 3 * 3 * 3 + ${offset} = ${27 + offset}.`,
+        s1_in: '4',
+        s1_out: String(4 * 4 * 4 + offset),
+        s1_exp: `For x = 4, the result is 4 * 4 * 4 + ${offset} = ${64 + offset}.`,
+        fn: (x: number) => x * x * x + offset
+      };
+    }
+    else {
+      const shift = wNum;
+      return {
+        title: `${getWeekCategory(wIdx)} Sequence`,
+        difficulty: Difficulty.HARD,
+        points: 30,
+        tags: [getWeekTag(wIdx)],
+        t1: 'int x',
+        t2: 'int',
+        desc: `Write a function \`solve(x)\` that returns \`x - ${shift}\` if \`x <= 1\`, and \`x + ${shift}\` otherwise.`,
+        s0_in: '1',
+        s0_out: String(1 - shift),
+        s0_exp: `Since 1 <= 1, it returns 1 - ${shift} = ${1 - shift}.`,
+        s1_in: '5',
+        s1_out: String(5 + shift),
+        s1_exp: `Since 5 > 1, it returns 5 + ${shift} = ${5 + shift}.`,
+        fn: (x: number) => x <= 1 ? x - shift : x + shift
+      };
+    }
+  }
 
   console.log('Seeding Weekly Modules...');
 
@@ -310,7 +348,7 @@ async function main() {
 
     // Seed exactly 10 coding challenges for this week (attached to the single day child)
     for (let pIdx = 0; pIdx < 10; pIdx++) {
-      const tmpl = codingTemplates[pIdx];
+      const tmpl = getDynamicTemplate(pIdx, wIdx);
       const title = `${weekTopics[wIdx].topic}: ${tmpl.title}`;
       const slug = `coding-w${wIdx + 1}-p${pIdx + 1}`;
       
