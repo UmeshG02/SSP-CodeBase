@@ -1638,6 +1638,201 @@ Return string \`true\` or \`false\`.`,
     ]
   });
 
+  console.log('Seeding competitive MNC exam questions...');
+  
+  const mncProblems = [
+    {
+      title: 'TCS: Keyword Finder',
+      slug: 'tcs-keyword-finder',
+      description: `# TCS NQT: Keyword Finder
+Write a function \`solve(word)\` that checks if a given string \`word\` is one of the standard Python keywords.
+The list of keywords to check against is: \`['if', 'else', 'while', 'for', 'def', 'class', 'return', 'import']\`.
+
+Return \`"yes"\` if it is a keyword, and \`"no"\` otherwise.
+
+### Input Format
+A single string \`word\`.
+
+### Output Format
+Return string \`"yes"\` or \`"no"\`.`,
+      difficulty: Difficulty.EASY,
+      points: 15,
+      tags: ['TCS', 'MNC Exam', 'Previous Paper', '2025', 'Strings'],
+      t1: 'string word',
+      t2: 'String',
+      testInputs: ["'if'", "'hello'", "'for'", "'python'", "'return'"],
+      fn: (word: string) => ['if', 'else', 'while', 'for', 'def', 'class', 'return', 'import'].includes(word.replace(/'/g, '')) ? 'yes' : 'no'
+    },
+    {
+      title: 'Wipro: Equilibrium Index',
+      slug: 'wipro-equilibrium-index',
+      description: `# Wipro NLTH: Equilibrium Index
+Given a comma-separated string of integers (e.g. \`"1,2,3,4,6"\`), find the index where the sum of elements before it equals the sum of elements after it. 
+
+Return the 0-based index if found, and \`-1\` otherwise.
+
+### Input Format
+A single comma-separated string \`arr\`.
+
+### Output Format
+Return the 0-based index or \`-1\`.`,
+      difficulty: Difficulty.MEDIUM,
+      points: 20,
+      tags: ['Wipro', 'MNC Exam', 'Previous Paper', '2024', 'Arrays'],
+      t1: 'string arr',
+      t2: 'int',
+      testInputs: ["'1,2,3,4,6'", "'1,2,3'", "'2,0,2'", "'1,1,1,3,2'", "'0,0,0,0,0'"],
+      fn: (s: string) => {
+        const nums = s.replace(/'/g, '').split(',').map(Number);
+        for (let i = 0; i < nums.length; i++) {
+          let left = 0;
+          for (let j = 0; j < i; j++) left += nums[j];
+          let right = 0;
+          for (let j = i + 1; j < nums.length; j++) right += nums[j];
+          if (left === right) return i;
+        }
+        return -1;
+      }
+    },
+    {
+      title: 'Infosys: Unique Digit Pairs',
+      slug: 'infosys-unique-digit-pairs',
+      description: `# Infosys HackWithInfy: Unique Digit Pairs
+Given a string containing comma-separated digits and a target sum separated by a pipe character (e.g., \`"1,3,2,4|5"\`), find the number of unique pairs of integers that sum up to the target.
+
+### Input Format
+A string of format \`"num1,num2,...|target"\`.
+
+### Output Format
+Return the number of unique pairs as an integer.`,
+      difficulty: Difficulty.MEDIUM,
+      points: 25,
+      tags: ['Infosys', 'MNC Exam', 'Previous Paper', '2024', 'Hash Table'],
+      t1: 'string input',
+      t2: 'int',
+      testInputs: ["'1,3,2,4|5'", "'1,1,1|2'", "'2,4,6,8|10'", "'5,5,5,5|10'", "'1,2,3,4|9'"],
+      fn: (s: string) => {
+        const parts = s.replace(/'/g, '').split('|');
+        const nums = parts[0].split(',').map(Number);
+        const target = parseInt(parts[1]);
+        const seen = new Set<string>();
+        let count = 0;
+        for (let i = 0; i < nums.length; i++) {
+          for (let j = i + 1; j < nums.length; j++) {
+            if (nums[i] + nums[j] === target) {
+              const pairStr = [nums[i], nums[j]].sort().join(',');
+              if (!seen.has(pairStr)) {
+                seen.add(pairStr);
+                count++;
+              }
+            }
+          }
+        }
+        return count;
+      }
+    },
+    {
+      title: 'Accenture: Binary Operations',
+      slug: 'accenture-binary-operations',
+      description: `# Accenture: Binary String Operations
+Given a string of alternating binary digits and alphabetical operators:
+* \`A\` represents AND
+* \`B\` represents OR
+* \`C\` represents XOR
+
+Evaluate the expression from left to right. E.g. \`"1A0B1"\` evaluates to \`(1 AND 0) OR 1 = 1\`.
+
+### Input Format
+A string \`str\` of alternating binary digits and letters.
+
+### Output Format
+Return \`1\` or \`0\`.`,
+      difficulty: Difficulty.EASY,
+      points: 15,
+      tags: ['Accenture', 'MNC Exam', 'Previous Paper', '2024', 'Bitwise'],
+      t1: 'string str',
+      t2: 'int',
+      testInputs: ["'1A0B1'", "'1C1B0A1'", "'0C0A1B1'", "'1A1A1A0'", "'1B1C0A1'"],
+      fn: (s: string) => {
+        const str = s.replace(/'/g, '');
+        let res = parseInt(str[0]);
+        for (let i = 1; i < str.length; i += 2) {
+          const op = str[i];
+          const nextVal = parseInt(str[i + 1]);
+          if (op === 'A') res = res & nextVal;
+          else if (op === 'B') res = res | nextVal;
+          else if (op === 'C') res = res ^ nextVal;
+        }
+        return res;
+      }
+    },
+    {
+      title: 'Cognizant: Prime Ranges',
+      slug: 'cognizant-prime-ranges',
+      description: `# Cognizant GenC: Prime Number Ranges
+Given a string with two integers separated by a comma \`"L,R"\`, count the number of prime numbers in the range \`[L, R]\` (inclusive).
+
+### Input Format
+A string containing two comma-separated bounds \`L,R\`.
+
+### Output Format
+Return the count of prime numbers as an integer.`,
+      difficulty: Difficulty.MEDIUM,
+      points: 20,
+      tags: ['Cognizant', 'MNC Exam', 'Previous Paper', '2023', 'Math'],
+      t1: 'string range',
+      t2: 'int',
+      testInputs: ["'10,20'", "'1,5'", "'50,100'", "'2,10'", "'100,110'"],
+      fn: (s: string) => {
+        const [L, R] = s.replace(/'/g, '').split(',').map(Number);
+        const isPrime = (n: number) => {
+          if (n < 2) return false;
+          for (let i = 2; i * i <= n; i++) if (n % i === 0) return false;
+          return true;
+        };
+        let count = 0;
+        for (let i = L; i <= R; i++) if (isPrime(i)) count++;
+        return count;
+      }
+    }
+  ];
+
+  for (const mnc of mncProblems) {
+    const problem = await prisma.problem.create({
+      data: {
+        title: mnc.title,
+        slug: mnc.slug,
+        description: mnc.description,
+        difficulty: mnc.difficulty,
+        type: ChallengeType.CODING,
+        points: mnc.points,
+        tags: mnc.tags,
+        inputFormat: 'Single string input',
+        outputFormat: 'Evaluated response',
+        templateCode: JSON.stringify({
+          javascript: 'function solve(x) {\n  // Write your code here\n}',
+          typescript: 'function solve(x: string): any {\n  // Write your code here\n}',
+          python: 'def solve(x):\n    # Write your code here\n    pass',
+          java: `class Solution {\n    public ${mnc.t2 === 'int' ? 'int' : 'String'} solve(String x) {\n        // Write your code here\n        return ${mnc.t2 === 'int' ? '0' : '""'};\n    }\n}`,
+          cpp: `class Solution {\npublic:\n    ${mnc.t2 === 'int' ? 'int' : 'string'} solve(string x) {\n        // Write your code here\n        return ${mnc.t2 === 'int' ? '0' : '""'};\n    }\n};`
+        })
+      }
+    });
+
+    const mncTc: any[] = [];
+    for (let t = 0; t < 5; t++) {
+      const inputVal = mnc.testInputs[t];
+      const expectedVal = mnc.fn(inputVal);
+      mncTc.push({
+        problemId: problem.id,
+        input: inputVal,
+        expected: typeof expectedVal === 'number' ? `${expectedVal}` : `"${expectedVal}"`,
+        isSample: t < 2
+      });
+    }
+    await prisma.testCase.createMany({ data: mncTc });
+  }
+
   console.log('✨ Guided weekly learning database seed complete successfully!');
 }
 
