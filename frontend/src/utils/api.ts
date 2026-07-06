@@ -5,7 +5,11 @@ interface ApiOptions extends Omit<RequestInit, 'body'> {
 }
 
 export async function apiFetch(endpoint: string, options: ApiOptions = {}) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('ssp_token') : null;
+  let tokenKey = 'ssp_token';
+  if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
+    tokenKey = 'ssp_admin_token';
+  }
+  const token = typeof window !== 'undefined' ? localStorage.getItem(tokenKey) : null;
 
   const headers: HeadersInit = {
     ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),

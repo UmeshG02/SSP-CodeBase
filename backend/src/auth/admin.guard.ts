@@ -19,7 +19,15 @@ export class AdminGuard extends JwtAuthGuard implements CanActivate {
       Role.SUPPORT_STAFF
     ];
 
-    if (!user || !adminRoles.includes(user.role)) {
+    if (!user) {
+      console.log('[AdminGuard] Access Denied: request.user is undefined');
+      throw new ForbiddenException('Access denied. Administrator privileges required.');
+    }
+
+    console.log(`[AdminGuard] Request URL: ${request.url} | User: ${user.email} | Role: ${user.role}`);
+
+    if (!adminRoles.includes(user.role)) {
+      console.log(`[AdminGuard] Access Denied: User role ${user.role} is not in admin roles list`);
       throw new ForbiddenException('Access denied. Administrator privileges required.');
     }
 

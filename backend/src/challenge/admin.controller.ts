@@ -221,6 +221,10 @@ export class AdminController {
   async updateUser(@CurrentUser() admin: any, @Param('id') id: string, @Body() body: any) {
     const { name, college, company, role, expLevel } = body;
     
+    if (admin.id === id && role && role !== admin.role) {
+      throw new BadRequestException('You cannot modify your own administrative role to prevent self-lockout.');
+    }
+    
     const user = await this.prisma.user.update({
       where: { id },
       data: {
@@ -243,6 +247,10 @@ export class AdminController {
 
   @Delete('users/:id')
   async deleteUser(@CurrentUser() admin: any, @Param('id') id: string) {
+    if (admin.id === id) {
+      throw new BadRequestException('You cannot delete your own administrative account.');
+    }
+
     const user = await this.prisma.user.delete({
       where: { id }
     });

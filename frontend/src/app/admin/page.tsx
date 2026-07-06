@@ -115,7 +115,7 @@ export default function AdminPortal() {
   // Check auth and role
   const checkAdminAuth = async () => {
     setLoadingAuth(true);
-    const token = localStorage.getItem('ssp_token');
+    const token = localStorage.getItem('ssp_admin_token');
     if (!token) {
       setIsAuthenticated(false);
       setLoadingAuth(false);
@@ -151,7 +151,7 @@ export default function AdminPortal() {
         body: { email: usernameInput, password: passwordInput }
       });
       if (data && data.token) {
-        localStorage.setItem('ssp_token', data.token);
+        localStorage.setItem('ssp_admin_token', data.token);
         
         // Confirm user role
         const profile = await apiFetch('/profile');
@@ -159,7 +159,7 @@ export default function AdminPortal() {
           setIsAuthenticated(true);
           triggerToast('success', `Welcome back, ${profile.name}!`);
         } else {
-          localStorage.removeItem('ssp_token');
+          localStorage.removeItem('ssp_admin_token');
           setAuthError('Access Denied: Non-administrator account.');
         }
       } else {
@@ -494,7 +494,7 @@ export default function AdminPortal() {
     formData.append('file', syllabusFile);
 
     try {
-      const token = localStorage.getItem('ssp_token');
+      const token = localStorage.getItem('ssp_admin_token');
       const response = await fetch(`${API_URL}/roadmap/upload-pdf`, {
         method: 'POST',
         headers: {
@@ -768,7 +768,7 @@ export default function AdminPortal() {
             </button>
             <button 
               onClick={() => {
-                localStorage.removeItem('ssp_token');
+                localStorage.removeItem('ssp_admin_token');
                 setIsAuthenticated(false);
               }}
               className="text-xs font-bold text-rose-400 hover:text-rose-300 transition-colors cursor-pointer"
