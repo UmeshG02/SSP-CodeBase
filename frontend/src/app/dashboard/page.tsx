@@ -25,6 +25,7 @@ export default function Dashboard() {
   const [competitiveProblems, setCompetitiveProblems] = useState<any[]>([]);
   const [loadingCompetitive, setLoadingCompetitive] = useState(false);
   const [selectedMncFilter, setSelectedMncFilter] = useState<'ALL' | 'TCS' | 'WIPRO' | 'INFOSYS' | 'ACCENTURE' | 'COGNIZANT'>('ALL');
+  const [selectedYearFilter, setSelectedYearFilter] = useState<'ALL' | '2025' | '2024' | '2023' | '2022' | '2021'>('ALL');
 
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -132,10 +133,11 @@ export default function Dashboard() {
   const solvedProblemsCount = weekProblems.filter(p => p.solved).length;
   const progressPercent = totalProblemsCount > 0 ? Math.round((solvedProblemsCount / totalProblemsCount) * 100) : 0;
 
-  // Filter competitive problems by selected MNC tag
+  // Filter competitive problems by selected MNC tag and year tag
   const filteredCompetitive = competitiveProblems.filter((p: any) => {
-    if (selectedMncFilter === 'ALL') return true;
-    return p.tags.some((t: string) => t.toUpperCase() === selectedMncFilter.toUpperCase());
+    const matchesMnc = selectedMncFilter === 'ALL' || p.tags.some((t: string) => t.toUpperCase() === selectedMncFilter.toUpperCase());
+    const matchesYear = selectedYearFilter === 'ALL' || p.tags.some((t: string) => t === selectedYearFilter);
+    return matchesMnc && matchesYear;
   });
 
   // Find user's active page link
@@ -454,6 +456,26 @@ export default function Dashboard() {
                     }`}
                   >
                     {mnc === 'ALL' ? 'All Companies' : mnc}
+                  </button>
+                ))}
+              </div>
+
+              {/* Year Filter Sub-Bar */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="text-[10px] uppercase font-bold text-zinc-500 mr-1">Filter Year:</span>
+                {(['ALL', '2025', '2024', '2023', '2022', '2021'] as const).map((yr) => (
+                  <button
+                    key={yr}
+                    onClick={() => setSelectedYearFilter(yr)}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
+                      selectedYearFilter === yr
+                        ? 'bg-zinc-800 text-white border border-zinc-700'
+                        : theme === 'light'
+                          ? 'text-zinc-650 bg-zinc-150 hover:bg-zinc-200'
+                          : 'text-zinc-400 bg-zinc-950/40 hover:bg-zinc-900 border border-transparent'
+                    }`}
+                  >
+                    {yr === 'ALL' ? 'All Years' : yr}
                   </button>
                 ))}
               </div>

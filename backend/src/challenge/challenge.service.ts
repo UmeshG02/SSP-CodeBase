@@ -807,7 +807,7 @@ except Exception as e:
   private getParamTypes(slug: string): string[] {
     if (slug.startsWith('two-sum')) return ['vector<int>', 'int'];
     if (slug.startsWith('palindrome-number') || slug.startsWith('leap-year-check') || slug.startsWith('factorial-calc') || slug.startsWith('prime-check') || slug.startsWith('fibonacci-at-n') || slug.startsWith('is-square')) return ['int'];
-    if (slug.startsWith('word-reverse') || slug.startsWith('count-vowels') || slug.startsWith('coding-w7-p4') || slug.startsWith('tcs-') || slug.startsWith('wipro-') || slug.startsWith('infosys-') || slug.startsWith('accenture-') || slug.startsWith('cognizant-')) return ['string'];
+    if (slug.startsWith('word-reverse') || slug.startsWith('count-vowels') || slug.startsWith('coding-w7-p4') || slug.startsWith('tcs-') || slug === 'wipro-equilibrium-index' || slug === 'infosys-unique-digit-pairs' || slug.startsWith('accenture-') || slug.startsWith('cognizant-')) return ['string'];
     if (slug.startsWith('array-sum') || slug.startsWith('array-max') || slug.startsWith('array-min') || slug.startsWith('even-filter') || slug.startsWith('multiply-array-elements')) return ['vector<int>'];
     if (slug.startsWith('celsius-to-fahrenheit')) return ['double'];
     if (slug.startsWith('contain-substring')) return ['string', 'string'];

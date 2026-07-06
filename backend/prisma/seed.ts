@@ -1794,10 +1794,77 @@ Return the count of prime numbers as an integer.`,
         for (let i = L; i <= R; i++) if (isPrime(i)) count++;
         return count;
       }
+    },
+    {
+      title: 'Infosys: Grid Path Count',
+      slug: 'infosys-grid-path-count',
+      description: `# Infosys HackWithInfy: Grid Path Count
+Write a function \`solve(n)\` that calculates the number of unique paths to reach the bottom-right corner from the top-left corner of an \`n x n\` grid. You can only move down or right.
+
+### Input Format
+A single integer \`n\`.
+
+### Output Format
+Return the total unique paths as an integer.`,
+      difficulty: Difficulty.HARD,
+      points: 30,
+      tags: ['Infosys', 'MNC Exam', 'Previous Paper', '2022', 'Dynamic Programming'],
+      t1: 'int n',
+      t2: 'int',
+      testInputs: [2, 3, 4, 5, 6],
+      fn: (n: number) => {
+        const fact = (x: number): number => x <= 1 ? 1 : x * fact(x - 1);
+        return Math.round(fact(2 * (n - 1)) / (fact(n - 1) * fact(n - 1)));
+      }
+    },
+    {
+      title: 'TCS: Sweet Seventeen',
+      slug: 'tcs-sweet-seventeen',
+      description: `# TCS NQT: Sweet Seventeen
+Given a string representing a base-17 number (with digits \`0-9\` and \`A-G\` representing values \`10-16\`), convert it to decimal.
+
+### Input Format
+A single string \`str\` representing base-17.
+
+### Output Format
+Return the decimal value as an integer.`,
+      difficulty: Difficulty.EASY,
+      points: 15,
+      tags: ['TCS', 'MNC Exam', 'Previous Paper', '2022', 'Math'],
+      t1: 'string str',
+      t2: 'int',
+      testInputs: ["'1A'", "'23'", "'G'", "'10'", "'AG'"],
+      fn: (s: string) => {
+        const str = s.replace(/'/g, '');
+        return parseInt(str, 17);
+      }
+    },
+    {
+      title: 'Wipro: Perfect Squares Sum',
+      slug: 'wipro-perfect-squares-sum',
+      description: `# Wipro Elite: Perfect Squares Sum
+Write a function \`solve(n)\` that computes the sum of squares of integers from 1 up to \`n\`. Return \`"even"\` if the sum is even, and \`"odd"\` otherwise.
+
+### Input Format
+A single integer \`n\`.
+
+### Output Format
+Return string \`"even"\` or \`"odd"\`.`,
+      difficulty: Difficulty.EASY,
+      points: 15,
+      tags: ['Wipro', 'MNC Exam', 'Previous Paper', '2021', 'Math'],
+      t1: 'int n',
+      t2: 'String',
+      testInputs: [3, 5, 10, 15, 20],
+      fn: (n: number) => {
+        let sum = 0;
+        for (let i = 1; i <= n; i++) sum += i * i;
+        return sum % 2 === 0 ? "even" : "odd";
+      }
     }
   ];
 
-  for (const mnc of mncProblems) {
+  for (const mnc of mncProblems as any[]) {
     const problem = await prisma.problem.create({
       data: {
         title: mnc.title,
@@ -1825,7 +1892,7 @@ Return the count of prime numbers as an integer.`,
       const expectedVal = mnc.fn(inputVal);
       mncTc.push({
         problemId: problem.id,
-        input: inputVal,
+        input: `${inputVal}`,
         expected: typeof expectedVal === 'number' ? `${expectedVal}` : `"${expectedVal}"`,
         isSample: t < 2
       });
