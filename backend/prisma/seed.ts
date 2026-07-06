@@ -896,6 +896,7 @@ async function main() {
           s1_in: '5',
           s1_out: '1',
           s1_exp: '5 in binary is 101 (1 pattern).',
+          testInputs: [21, 5, 85, 341, 1365],
           fn: (x: number) => {
             const binary = x.toString(2);
             let count = 0;
@@ -1470,49 +1471,49 @@ async function main() {
 
     // Seed exactly 10 coding challenges for this week (attached to the single day child)
     for (let pIdx = 0; pIdx < 10; pIdx++) {
-      const tmpl = getDynamicTemplate(pIdx, wIdx);
+      const tmpl = getDynamicTemplate(pIdx, wIdx) as any;
       const title = `${weekTopics[wIdx].topic}: ${tmpl.title}`;
       const slug = `coding-w${wIdx + 1}-p${pIdx + 1}`;
       
       const problemDescription = `# ${title}
-
+ 
 ${tmpl.desc}
-
+ 
 ### Function Description
 Complete the \`solve\` function in the editor below.
-
+ 
 solve has the following parameters:
 * \`${tmpl.t1}\`: input parameter
-
+ 
 ### Returns
 * \`${tmpl.t2}\`: evaluated response
-
+ 
 ### Sample Input 0
 \`\`\`
 ${tmpl.s0_in}
 \`\`\`
-
+ 
 ### Sample Output 0
 \`\`\`
 ${tmpl.s0_out}
 \`\`\`
-
+ 
 ### Explanation 0
 ${tmpl.s0_exp}
-
+ 
 ### Sample Input 1
 \`\`\`
 ${tmpl.s1_in}
 \`\`\`
-
+ 
 ### Sample Output 1
 \`\`\`
 ${tmpl.s1_out}
 \`\`\`
-
+ 
 ### Explanation 1
 ${tmpl.s1_exp}`;
-
+ 
       const problem = await prisma.problem.create({
         data: {
           title,
@@ -1534,11 +1535,12 @@ ${tmpl.s1_exp}`;
           })
         }
       });
-
-      // Seed 5 testcases for this coding question
+ 
       const testCases: any[] = [];
       for (let t = 0; t < 5; t++) {
-        const inputVal = (t + 1) * (pIdx + 2) + wIdx;
+        const inputVal = (tmpl.testInputs && tmpl.testInputs[t] !== undefined)
+          ? tmpl.testInputs[t]
+          : (t + 1) * (pIdx + 2) + wIdx;
         const expectedVal = tmpl.fn(inputVal);
         testCases.push({
           problemId: problem.id,
