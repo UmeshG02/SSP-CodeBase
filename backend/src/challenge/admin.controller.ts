@@ -88,10 +88,10 @@ export class AdminController {
       }
     });
 
-    // Recent activity (last 10 submissions)
+    // Recent activity (last 100 submissions)
     const recentActivity = await this.prisma.submission.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 10,
+      take: 100,
       include: {
         user: {
           select: {

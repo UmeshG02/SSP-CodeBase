@@ -30,6 +30,7 @@ export default function AdminPortal() {
   // Stats Dashboard state
   const [stats, setStats] = useState<any>(null);
   const [loadingStats, setLoadingStats] = useState(false);
+  const [streamFilter, setStreamFilter] = useState<'today' | 'yesterday' | 'all'>('all');
 
   // User Management state
   const [usersList, setUsersList] = useState<any[]>([]);
@@ -721,6 +722,52 @@ export default function AdminPortal() {
     );
   }
 
+  // Stream activity filtering
+  const filteredActivity = (stats?.recentActivity || []).filter((act: any) => {
+    const actDate = new Date(act.createdAt);
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+
+    const actMidnight = new Date(actDate);
+    actMidnight.setHours(0, 0, 0, 0);
+
+    if (streamFilter === 'today') {
+      return actMidnight.getTime() === today.getTime();
+    }
+    if (streamFilter === 'yesterday') {
+      return actMidnight.getTime() === yesterday.getTime();
+    }
+    return true;
+  });
+
+  const formatActivityDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+    
+    const targetMidnight = new Date(date);
+    targetMidnight.setHours(0, 0, 0, 0);
+    
+    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    if (targetMidnight.getTime() === today.getTime()) {
+      return `Today, ${timeStr}`;
+    } else if (targetMidnight.getTime() === yesterday.getTime()) {
+      return `Yesterday, ${timeStr}`;
+    } else {
+      return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })}, ${timeStr}`;
+    }
+  };
+
   // 2. Full Admin Portal Workspace
   return (
     <div className={`min-h-screen flex flex-col transition-colors ${
@@ -1044,25 +1091,48 @@ export default function AdminPortal() {
                     <div className={`p-6 rounded-2xl border ${
                       theme === 'light' ? 'bg-white border-zinc-200 shadow-sm' : 'bg-zinc-900 border-zinc-850'
                     }`}>
-                      <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-4 flex items-center gap-2">
-                        <Terminal className="w-4 h-4 text-emerald-400" />
-                        <span>Live Execution Streams</span>
-                      </h4>
+                      <div className="flex justify-between items-center mb-4">
+                        <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                          <Terminal className="w-4 h-4 text-emerald-400" />
+                          <span>Live Execution Streams ({filteredActivity.length})</span>
+                        </h4>
+                        <div className="flex gap-1 bg-zinc-950/60 p-0.5 rounded-lg border border-zinc-900">
+                          {(['today', 'yesterday', 'all'] as const).map((filter) => (
+                            <button
+                              key={filter}
+                              onClick={() => setStreamFilter(filter)}
+                              className={`px-2 py-1 rounded-md text-[9px] font-black capitalize transition-all cursor-pointer ${
+                                streamFilter === filter
+                                  ? 'bg-indigo-600 text-white shadow-sm'
+                                  : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                              }`}
+                            >
+                              {filter}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                       <div className="space-y-3.5 max-h-[280px] overflow-y-auto pr-1">
-                        {stats.recentActivity.map((act: any) => (
-                          <div key={act.id} className="p-3 rounded-xl bg-zinc-950/40 border border-zinc-900 flex justify-between items-center text-xs font-mono">
-                            <div className="space-y-0.5">
-                              <span className="text-[10px] text-indigo-400 font-bold block">{act.user}</span>
-                              <span className="text-zinc-300 font-medium">{act.problem}</span>
+                        {filteredActivity.length > 0 ? (
+                          filteredActivity.map((act: any) => (
+                            <div key={act.id} className="p-3 rounded-xl bg-zinc-950/40 border border-zinc-900 flex justify-between items-center text-xs font-mono">
+                              <div className="space-y-0.5">
+                                <span className="text-[10px] text-indigo-400 font-bold block">{act.user}</span>
+                                <span className="text-zinc-300 font-medium">{act.problem}</span>
+                              </div>
+                              <div className="text-right space-y-1">
+                                <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                                  act.status === 'ACCEPTED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                                }`}>{act.status}</span>
+                                <span className="block text-[8px] text-zinc-650">{formatActivityDate(act.createdAt)}</span>
+                              </div>
                             </div>
-                            <div className="text-right space-y-1">
-                              <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
-                                act.status === 'ACCEPTED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                              }`}>{act.status}</span>
-                              <span className="block text-[8px] text-zinc-650">{new Date(act.createdAt).toLocaleTimeString()}</span>
-                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-12 text-zinc-500 text-xs">
+                            No submissions recorded for this date range.
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
                   </div>
