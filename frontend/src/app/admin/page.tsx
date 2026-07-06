@@ -30,7 +30,8 @@ export default function AdminPortal() {
   // Stats Dashboard state
   const [stats, setStats] = useState<any>(null);
   const [loadingStats, setLoadingStats] = useState(false);
-  const [streamFilter, setStreamFilter] = useState<'today' | 'yesterday' | 'all'>('all');
+  const [streamFilter, setStreamFilter] = useState<'today' | 'yesterday' | 'custom' | 'all'>('all');
+  const [selectedCustomDate, setSelectedCustomDate] = useState<string>('');
 
   // User Management state
   const [usersList, setUsersList] = useState<any[]>([]);
@@ -742,6 +743,14 @@ export default function AdminPortal() {
     if (streamFilter === 'yesterday') {
       return actMidnight.getTime() === yesterday.getTime();
     }
+    if (streamFilter === 'custom') {
+      if (!selectedCustomDate) return false;
+      const yyyy = actDate.getFullYear();
+      const mm = String(actDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(actDate.getDate()).padStart(2, '0');
+      const actDateStr = `${yyyy}-${mm}-${dd}`;
+      return actDateStr === selectedCustomDate;
+    }
     return true;
   });
 
@@ -1096,8 +1105,8 @@ export default function AdminPortal() {
                           <Terminal className="w-4 h-4 text-emerald-400" />
                           <span>Live Execution Streams ({filteredActivity.length})</span>
                         </h4>
-                        <div className="flex gap-1 bg-zinc-950/60 p-0.5 rounded-lg border border-zinc-900">
-                          {(['today', 'yesterday', 'all'] as const).map((filter) => (
+                        <div className="flex gap-1 bg-zinc-950/60 p-0.5 rounded-lg border border-zinc-900 items-center">
+                          {(['today', 'yesterday', 'custom', 'all'] as const).map((filter) => (
                             <button
                               key={filter}
                               onClick={() => setStreamFilter(filter)}
@@ -1107,9 +1116,21 @@ export default function AdminPortal() {
                                   : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
                               }`}
                             >
-                              {filter}
+                              {filter === 'custom' ? 'Select Date' : filter}
                             </button>
                           ))}
+                          {streamFilter === 'custom' && (
+                            <input
+                              type="date"
+                              value={selectedCustomDate}
+                              onChange={(e) => setSelectedCustomDate(e.target.value)}
+                              className={`ml-1.5 px-2 py-0.5 rounded text-[9px] border outline-none font-bold cursor-pointer ${
+                                theme === 'light'
+                                  ? 'bg-white border-zinc-300 text-zinc-900'
+                                  : 'bg-zinc-950 border-zinc-800 text-white'
+                              }`}
+                            />
+                          )}
                         </div>
                       </div>
                       <div className="space-y-3.5 max-h-[280px] overflow-y-auto pr-1">
