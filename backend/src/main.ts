@@ -2,9 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ExpressAdapter } from '@nestjs/platform-express';
+import express from 'express';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+const server = express();
+
+async function createServer(expressInstance: any) {
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(expressInstance));
 
   // Enable CORS
   app.enableCors({
@@ -31,9 +35,27 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = process.env.PORT ?? 3001;
-  await app.listen(port);
-  console.log(`🚀 SSP CodeBase Backend is running on: http://localhost:${port}`);
-  console.log(`📄 API Documentation available at: http://localhost:${port}/api/docs`);
+  await app.init();
+  return app;
 }
-bootstrap();
+
+// Vercel serverless function entry
+let appInstance: any;
+export default async (req: any, res: any) => {
+  if (!appInstance) {
+    appInstance = await createServer(server);
+  }
+  return server(req, res);
+};
+
+// For local running
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  const port = process.env.PORT ?? 3001;
+  createServer(server).then((app) => {
+    app.listen(port).then(() => {
+      console.log(`🚀 SSP CodeBase Backend is running on: http://localhost:${port}`);
+      console.log(`📄 API Documentation available at: http://localhost:${port}/api/docs`);
+    });
+  });
+}
+
