@@ -469,7 +469,7 @@ export default function ChallengeWorkspace({ params }: { params: Promise<Params>
                       {problem?.difficulty}
                     </span>
                     <span className="text-zinc-700">•</span>
-                    <span className="text-xs text-indigo-500 font-extrabold">+{problem?.points} XP</span>
+                    <span className="text-xs text-indigo-500 font-extrabold">+{problem?.points} ⚡</span>
                   </div>
 
                   <h1 className={`text-2xl font-black ${theme === 'light' ? 'text-zinc-950' : 'text-white'}`}>{problem?.title}</h1>
@@ -854,7 +854,7 @@ export default function ChallengeWorkspace({ params }: { params: Promise<Params>
               <h3 className="text-xl font-black text-white">Challenge Solved!</h3>
               <p className="text-sm text-zinc-400">
                 Excellent job! You successfully solved "{problem?.title}" and earned{' '}
-                <span className="text-indigo-400 font-extrabold">+{problem?.points} XP</span>.
+                <span className="text-indigo-400 font-extrabold">+{problem?.points} ⚡</span>.
               </p>
             </div>
 

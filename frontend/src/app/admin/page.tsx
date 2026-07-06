@@ -1019,23 +1019,23 @@ export default function AdminPortal() {
                     }`}>
                       <h4 className="text-xs font-black uppercase tracking-wider text-zinc-400 mb-4 flex items-center gap-2">
                         <Award className="w-4 h-4 text-indigo-400" />
-                        <span>Leaderboard Leaders (XP)</span>
+                        <span>Leaderboard Leaders (⚡)</span>
                       </h4>
                       <div className="divide-y divide-zinc-850">
                         {stats.topPerformers.map((user: any, idx: number) => (
-                          <div key={user.username} className="py-3.5 flex justify-between items-center text-xs">
-                            <div className="flex items-center gap-3">
-                              <span className="font-bold text-zinc-500">#{idx + 1}</span>
-                              <div>
-                                <h5 className="font-extrabold text-white">{user.name}</h5>
-                                <p className="text-[10px] text-zinc-500 font-mono">@{user.username}</p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <span className="text-indigo-400 font-black font-mono">{user.xp} XP</span>
-                              <span className="block text-[9px] text-zinc-500">Level {user.level}</span>
-                            </div>
-                          </div>
+                           <div key={user.username} className="py-3.5 flex justify-between items-center text-xs">
+                             <div className="flex items-center gap-3">
+                               <span className="font-bold text-zinc-500">#{idx + 1}</span>
+                               <div>
+                                 <h5 className="font-extrabold text-white">{user.name}</h5>
+                                 <p className="text-[10px] text-zinc-500 font-mono">@{user.username}</p>
+                               </div>
+                             </div>
+                             <div className="text-right">
+                               <span className="text-indigo-400 font-black font-mono">{user.xp} ⚡</span>
+                               <span className="block text-[9px] text-zinc-500">Level {user.level}</span>
+                             </div>
+                           </div>
                         ))}
                       </div>
                     </div>
@@ -1163,7 +1163,7 @@ export default function AdminPortal() {
                           <th className="p-4">Role</th>
                           <th className="p-4">Module Position</th>
                           <th className="p-4">Submissions</th>
-                          <th className="p-4">XP</th>
+                          <th className="p-4">⚡</th>
                           <th className="p-4">Coins</th>
                           <th className="p-4 text-right">Actions</th>
                         </tr>
@@ -1284,23 +1284,23 @@ export default function AdminPortal() {
                     </div>
 
                     <div className="p-3.5 rounded-xl bg-zinc-950/60 border border-zinc-900 space-y-1">
-                      <span className="text-[9px] text-zinc-500 uppercase">XP Level</span>
+                      <span className="text-[9px] text-zinc-500 uppercase">⚡ Level</span>
                       <div className="flex items-center gap-2">
                         <Award className="w-4 h-4 text-indigo-400" />
-                        <span className="font-bold text-white">{selectedUser.profile?.xp || 0} XP</span>
+                        <span className="font-bold text-white">{selectedUser.profile?.xp || 0} ⚡</span>
                       </div>
                       <div className="flex gap-2 mt-2">
                         <button 
                           onClick={() => handleGrantReward('xp', 50)} 
                           className="text-[9px] text-indigo-400 hover:underline"
                         >
-                          +50 XP
+                          +50 ⚡
                         </button>
                         <button 
                           onClick={() => handleGrantReward('xp', 250)} 
                           className="text-[9px] text-indigo-400 hover:underline"
                         >
-                          +250 XP
+                          +250 ⚡
                         </button>
                       </div>
                     </div>
@@ -1471,7 +1471,7 @@ export default function AdminPortal() {
                           <th className="p-4">Title</th>
                           <th className="p-4">Type</th>
                           <th className="p-4">Difficulty</th>
-                          <th className="p-4">XP Reward</th>
+                          <th className="p-4">⚡ Reward</th>
                           <th className="p-4">Test Cases</th>
                           <th className="p-4 text-right">Actions</th>
                         </tr>
@@ -1497,7 +1497,7 @@ export default function AdminPortal() {
                                 : 'text-rose-400 bg-rose-500/10'
                               }`}>{prob.difficulty}</span>
                             </td>
-                            <td className="p-4 font-mono font-bold text-indigo-400">+{prob.points} XP</td>
+                            <td className="p-4 font-mono font-bold text-indigo-400">+{prob.points} ⚡</td>
                             <td className="p-4 font-mono text-zinc-400">{prob.testCases?.length || 0} loaded</td>
                             <td className="p-4 text-right">
                               <div className="flex justify-end gap-2">
@@ -1612,7 +1612,7 @@ export default function AdminPortal() {
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="text-[10px] font-extrabold uppercase text-zinc-400">XP Points</label>
+                          <label className="text-[10px] font-extrabold uppercase text-zinc-400">⚡ Points</label>
                           <input
                             type="number"
                             value={problemForm.points}

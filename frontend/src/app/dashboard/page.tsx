@@ -451,7 +451,7 @@ export default function Dashboard() {
                         <p className="text-[9px] text-zinc-500">Level {u.level}</p>
                       </div>
                     </div>
-                    <span className="text-xs font-black text-indigo-500">{u.xp} XP</span>
+                    <span className="text-xs font-black text-indigo-500">{u.xp} ⚡</span>
                   </div>
                 );
               })}
@@ -483,7 +483,7 @@ function ChallengeItem({ p, theme }: { p: any, theme: 'dark' | 'light' }) {
         <div>
           <h5 className={`text-sm font-bold leading-tight ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`}>{p.title.replace(/^.*:\s*/, '')}</h5>
           <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 mt-1">
-            <span>+{p.points} XP</span>
+            <span>+{p.points} ⚡</span>
             <span>•</span>
             {p.tags.map((t: string) => (
               <span key={t} className={`px-1.5 py-0.5 rounded text-[9px] ${
