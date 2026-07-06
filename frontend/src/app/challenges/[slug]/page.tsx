@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, useRef, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Editor from '@monaco-editor/react';
@@ -8,7 +8,7 @@ import { apiFetch } from '@/utils/api';
 import { 
   Code, Database, Play, CheckCircle, AlertTriangle, Sparkles, 
   ArrowLeft, Trophy, Award, Flame, Sun, Moon,
-  MessageSquare, History, Lock, Send, User 
+  MessageSquare, History, Lock, Send, User, ShieldAlert, Shield, ShieldCheck
 } from 'lucide-react';
 
 interface Params {
@@ -159,6 +159,36 @@ export default function ChallengeWorkspace({ params }: { params: Promise<Params>
   // Console Tabs for testcases
   const [selectedTestCaseIdx, setSelectedTestCaseIdx] = useState(0);
 
+  // ── Exam Secure Mode ────────────────────────────────────────────────────────
+  const [secureMode, setSecureMode] = useState(false);
+  const [examConfig, setExamConfig] = useState<any>(null);
+  const [violationCount, setViolationCount] = useState(0);
+  const [violationWarning, setViolationWarning] = useState<string | null>(null);
+  const [examLocked, setExamLocked] = useState(false);
+  const [lockTimeRemaining, setLockTimeRemaining] = useState<number | null>(null);
+  const violationCountRef = useRef(0);
+  const examConfigRef = useRef<any>(null);
+  const secureModeRef = useRef(false);
+  const problemRef = useRef<any>(null);
+
+  // Lockout Timer Countdown Hook
+  useEffect(() => {
+    if (lockTimeRemaining === null || lockTimeRemaining <= 0) return;
+    const interval = setInterval(() => {
+      setLockTimeRemaining(prev => {
+        if (prev === null || prev <= 1) {
+          clearInterval(interval);
+          setExamLocked(false);
+          localStorage.removeItem(`ssp_exam_lock_${slug}`);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lockTimeRemaining, slug]);
+  // ─────────────────────────────────────────────────────────────────────────────
+
   useEffect(() => {
     // Read theme preference
     const savedTheme = localStorage.getItem('ssp_theme') as 'dark' | 'light';
@@ -170,6 +200,7 @@ export default function ChallengeWorkspace({ params }: { params: Promise<Params>
       try {
         const data = await apiFetch(`/challenges/${slug}`);
         setProblem(data);
+        problemRef.current = data;
         
         let initialLang = 'javascript';
         try {
@@ -194,6 +225,28 @@ export default function ChallengeWorkspace({ params }: { params: Promise<Params>
 
         const allChals = await apiFetch('/challenges');
         setAllChallenges(allChals);
+
+        // Load exam config
+        try {
+          const config = await apiFetch('/challenges/secure-mode/config');
+          setExamConfig(config);
+          examConfigRef.current = config;
+        } catch (e) {
+          console.warn('Could not load exam config', e);
+        }
+
+        // Check if locked
+        const lockExpires = localStorage.getItem(`ssp_exam_lock_${slug}`);
+        if (lockExpires) {
+          const remainingTime = parseInt(lockExpires, 10) - Date.now();
+          if (remainingTime > 0) {
+            setExamLocked(true);
+            setLockTimeRemaining(Math.ceil(remainingTime / 1000));
+            setViolationWarning(`Your assessment has been locked due to exam integrity violations. Please wait for the lockout timer to expire.`);
+          } else {
+            localStorage.removeItem(`ssp_exam_lock_${slug}`);
+          }
+        }
       } catch (err) {
         console.warn('Failed to load problem:', err);
         router.push('/dashboard');
@@ -286,8 +339,163 @@ export default function ChallengeWorkspace({ params }: { params: Promise<Params>
     }
   };
 
+  // ── Secure Mode Helpers ─────────────────────────────────────────────────────
+  const getBrowserInfo = () => {
+    const ua = navigator.userAgent;
+    let browser = 'Unknown';
+    if (ua.includes('Edg')) browser = 'Edge';
+    else if (ua.includes('Chrome')) browser = 'Chrome';
+    else if (ua.includes('Firefox')) browser = 'Firefox';
+    else if (ua.includes('Safari')) browser = 'Safari';
+    let osName = 'Unknown';
+    if (ua.includes('Windows')) osName = 'Windows';
+    else if (ua.includes('Mac')) osName = 'macOS';
+    else if (ua.includes('Linux')) osName = 'Linux';
+    else if (ua.includes('Android')) osName = 'Android';
+    else if (ua.includes('iPhone') || ua.includes('iPad')) osName = 'iOS';
+    return { browser, os: osName };
+  };
+
+  const handleViolation = useCallback(async (type: string, details?: string) => {
+    if (!secureModeRef.current || examLocked) return;
+
+    const config = examConfigRef.current;
+    const maxV = config?.maxViolations ?? 3;
+    const newCount = violationCountRef.current + 1;
+    violationCountRef.current = newCount;
+    setViolationCount(newCount);
+
+    // Log to backend
+    try {
+      const { browser, os } = getBrowserInfo();
+      await apiFetch('/challenges/secure-mode/violation', {
+        method: 'POST',
+        body: JSON.stringify({
+          problemId: problemRef.current?.id ?? '',
+          violationType: type,
+          details: details ?? type,
+          totalCount: newCount,
+          browser,
+          os,
+        }),
+      });
+    } catch (_) {}
+
+    if (newCount >= maxV) {
+      // Auto-submit and lock
+      const reason = `Auto-submitted after ${newCount} exam security violations.`;
+      setViolationWarning(config?.warningMsg3 ?? reason);
+      setExamLocked(true);
+      secureModeRef.current = false;
+      setSecureMode(false);
+
+      // Lockout duration configuration: 30 minutes
+      const lockExpires = Date.now() + 30 * 60 * 1000;
+      localStorage.setItem(`ssp_exam_lock_${slug}`, lockExpires.toString());
+      setLockTimeRemaining(30 * 60);
+
+      // Exit fullscreen
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+
+      // Auto submit current code
+      try {
+        const prob = problemRef.current;
+        if (prob?.type === 'CODING') {
+          await apiFetch(`/challenges/${prob.slug}/submit`, {
+            method: 'POST',
+            body: JSON.stringify({ code, language, autoSubmitted: true, autoSubmitReason: reason }),
+          });
+        } else if (prob?.type === 'SQL') {
+          await apiFetch(`/challenges/${prob.slug}/submit-sql`, {
+            method: 'POST',
+            body: JSON.stringify({ query: sqlQuery, autoSubmitted: true, autoSubmitReason: reason }),
+          });
+        }
+      } catch (_) {}
+    } else if (newCount === maxV - 1) {
+      setViolationWarning(
+        config?.warningMsg2 ?? `Warning ${newCount} of ${maxV}: One more violation will auto-submit your assessment.`
+      );
+    } else {
+      setViolationWarning(
+        config?.warningMsg1 ?? `Warning ${newCount} of ${maxV}: You have left the exam window. Please return immediately.`
+      );
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [examLocked, code, language, sqlQuery]);
+
+  // Listen for browser events when secure mode is active
+  useEffect(() => {
+    if (!secureMode) return;
+
+    const onVisibilityChange = () => {
+      if (document.hidden) handleViolation('TAB_SWITCH', 'User switched tab or minimized browser');
+    };
+    const onBlur = () => {
+      if (secureModeRef.current) handleViolation('WINDOW_BLUR', 'Browser window lost focus');
+    };
+    const onFullscreenChange = () => {
+      if (!document.fullscreenElement && secureModeRef.current) {
+        handleViolation('EXIT_FULLSCREEN', 'User exited fullscreen');
+      }
+    };
+    const onContextMenu = (e: MouseEvent) => {
+      if (secureModeRef.current) e.preventDefault();
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!secureModeRef.current) return;
+      // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+        (e.ctrlKey && e.key === 'u')
+      ) {
+        e.preventDefault();
+        handleViolation('DEVTOOLS', 'Attempted to open DevTools');
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('blur', onBlur);
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('contextmenu', onContextMenu);
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('blur', onBlur);
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+      document.removeEventListener('contextmenu', onContextMenu);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [secureMode, handleViolation]);
+
+  const startSecureMode = async () => {
+    try {
+      await document.documentElement.requestFullscreen();
+    } catch (_) {}
+    setViolationCount(0);
+    violationCountRef.current = 0;
+    setViolationWarning(null);
+    setExamLocked(false);
+    secureModeRef.current = true;
+    setSecureMode(true);
+  };
+
+  const exitSecureMode = () => {
+    secureModeRef.current = false;
+    setSecureMode(false);
+    setViolationWarning(null);
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+  // ─────────────────────────────────────────────────────────────────────────────
+
   const handleRun = async () => {
-    if (running) return;
+    if (running || examLocked) return;
     setRunning(true);
     setOutput(null);
     setSelectedTestCaseIdx(0);
@@ -349,26 +557,87 @@ export default function ChallengeWorkspace({ params }: { params: Promise<Params>
     <div className={`min-h-screen flex flex-col transition-colors duration-200 ${
       theme === 'light' ? 'bg-zinc-50 text-zinc-950' : 'bg-zinc-950 text-zinc-100'
     }`}>
+
+      {/* ── Violation Warning Overlay ── */}
+      {violationWarning && (
+        <div
+          className="fixed inset-0 z-[999] flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.80)', backdropFilter: 'blur(6px)' }}
+        >
+          <div className="relative bg-zinc-900 border border-red-500/60 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center">
+                <ShieldAlert className="w-8 h-8 text-red-400" />
+              </div>
+              <h2 className="text-xl font-bold text-red-400">Security Violation Detected</h2>
+              <p className="text-zinc-300 text-sm leading-relaxed">{violationWarning}</p>
+              {!examLocked && (
+                <div className="flex items-center gap-2 text-amber-400 text-xs">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <span>Violations: {violationCount} / {examConfig?.maxViolations ?? 3}</span>
+                </div>
+              )}
+              {examLocked ? (
+                <div className="w-full space-y-3">
+                  <div className="bg-red-950/40 border border-red-500/20 rounded-lg p-3">
+                    <p className="text-red-300 text-xs">Your assessment has been locked and auto-submitted.</p>
+                    {lockTimeRemaining !== null && (
+                      <p className="text-red-400 font-mono text-sm font-bold mt-2">
+                        Lockout Time Remaining: {Math.floor(lockTimeRemaining / 60)}m {lockTimeRemaining % 60}s
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => { setViolationWarning(null); router.push('/dashboard'); }}
+                    className="w-full py-2.5 bg-zinc-700 hover:bg-zinc-600 rounded-xl text-sm font-medium text-white transition-colors"
+                  >
+                    Return to Dashboard
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setViolationWarning(null)}
+                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-sm font-bold text-white transition-colors"
+                >
+                  I Understand — Return to Exam
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header Bar */}
       <header className={`border-b h-14 flex items-center justify-between z-20 px-6 ${
         theme === 'light' ? 'border-zinc-200 bg-white' : 'border-zinc-900 bg-zinc-950'
       }`}>
         <div className="flex items-center gap-4">
-          <Link href="/dashboard" className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-            theme === 'light' ? 'border-zinc-200 hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900' : 'border-zinc-800 hover:bg-zinc-900 text-zinc-400 hover:text-white'
-          }`}>
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
+          {!secureMode && (
+            <Link href="/dashboard" className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+              theme === 'light' ? 'border-zinc-200 hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900' : 'border-zinc-800 hover:bg-zinc-900 text-zinc-400 hover:text-white'
+            }`}>
+              <ArrowLeft className="w-4 h-4" />
+            </Link>
+          )}
           <div className="flex items-center gap-2">
             <span className="text-zinc-500 font-medium">Challenges</span>
             <span className="text-zinc-700">/</span>
             <span className={`font-bold text-sm ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`}>{problem?.title}</span>
           </div>
+
+          {/* Secure Mode Status Badge */}
+          {secureMode && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              Secure Mode
+              <span className="text-amber-400 ml-1">({violationCount}/{examConfig?.maxViolations ?? 3} violations)</span>
+            </div>
+          )}
         </div>
 
         {/* Action controls */}
         <div className="flex items-center gap-3">
-          {problem?.type === 'CODING' && (
+          {problem?.type === 'CODING' && !examLocked && (
             <select
               value={language}
               onChange={(e) => handleLanguageChange(e.target.value)}
@@ -397,10 +666,31 @@ export default function ChallengeWorkspace({ params }: { params: Promise<Params>
             {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
           </button>
 
+          {/* Secure Mode Toggle */}
+          {!examLocked && (
+            secureMode ? (
+              <button
+                onClick={exitSecureMode}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/60 border border-red-500/30 text-red-400 text-xs font-semibold rounded-lg transition-all cursor-pointer"
+              >
+                <ShieldAlert className="w-3.5 h-3.5" />
+                Exit Secure Mode
+              </button>
+            ) : (
+              <button
+                onClick={startSecureMode}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/40 border border-emerald-500/30 text-emerald-400 text-xs font-semibold rounded-lg transition-all cursor-pointer"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                Secure Mode
+              </button>
+            )
+          )}
+
           <button
             onClick={handleRun}
-            disabled={running}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 transition-all text-xs font-bold rounded-lg text-white cursor-pointer"
+            disabled={running || examLocked}
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 disabled:opacity-50 transition-all text-xs font-bold rounded-lg text-white cursor-pointer"
           >
             {running ? (
               <div className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />

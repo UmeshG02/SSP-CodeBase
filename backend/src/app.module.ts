@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
 import { ChallengeModule } from './challenge/challenge.module';
 import { RoadmapModule } from './roadmap/roadmap.module';
+import { SecureAssessmentModule } from './secure-assessment/secure-assessment.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -16,6 +17,7 @@ import { AppService } from './app.service';
     ProfileModule,
     ChallengeModule,
     RoadmapModule,
+    SecureAssessmentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

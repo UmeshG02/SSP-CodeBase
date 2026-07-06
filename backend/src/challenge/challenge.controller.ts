@@ -3,6 +3,8 @@ import { ChallengeService } from './challenge.service';
 import { CreateProblemDto } from './dto/create-problem.dto';
 import { SubmitCodeDto } from './dto/submit-code.dto';
 import { SubmitSqlDto } from './dto/submit-sql.dto';
+import { UpdateExamConfigDto } from './dto/update-exam-config.dto';
+import { LogViolationDto } from './dto/log-violation.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { ChallengeType } from '@prisma/client';
@@ -105,5 +107,43 @@ export class ChallengeController {
     @Body('content') content: string,
   ) {
     return this.challengeService.addProblemComment(user.id, slug, content);
+  }
+
+  @Get('secure-mode/config')
+  @ApiOperation({ summary: 'Get exam secure mode configuration' })
+  async getExamConfig() {
+    return this.challengeService.getExamConfig();
+  }
+
+  @Post('secure-mode/config')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update exam secure mode configuration (Admin)' })
+  async updateExamConfig(@Body() dto: UpdateExamConfigDto) {
+    return this.challengeService.updateExamConfig(dto);
+  }
+
+  @Post('secure-mode/violation')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Log a student security violation' })
+  async logViolation(@CurrentUser() user: any, @Body() dto: LogViolationDto) {
+    return this.challengeService.logViolation(user.id, dto);
+  }
+
+  @Get('secure-mode/violations')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all violation logs (Admin)' })
+  async getViolations() {
+    return this.challengeService.getViolations();
+  }
+
+  @Get('secure-mode/auto-submissions')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all auto-submitted exams (Admin)' })
+  async getAutoSubmissions() {
+    return this.challengeService.getAutoSubmissions();
   }
 }

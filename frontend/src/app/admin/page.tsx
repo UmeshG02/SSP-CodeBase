@@ -8,7 +8,8 @@ import {
   Users, BookOpen, BarChart2, Shield, Settings, Database, UploadCloud, 
   Plus, Search, Filter, Trash2, CheckCircle, AlertCircle, ArrowLeft, 
   Loader2, FileText, Lock, Unlock, Award, Coins, Flame, Edit, ArrowRight,
-  TrendingUp, RefreshCw, MessageSquare, Megaphone, Terminal, UserPlus, Check, Moon, Sun
+  TrendingUp, RefreshCw, MessageSquare, Megaphone, Terminal, UserPlus, Check, Moon, Sun,
+  ShieldAlert, ShieldCheck, AlertTriangle, Save, Play
 } from 'lucide-react';
 
 export default function AdminPortal() {
@@ -25,7 +26,25 @@ export default function AdminPortal() {
   const [authError, setAuthError] = useState<string | null>(null);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'content' | 'syllabus' | 'announcements' | 'logs'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'content' | 'syllabus' | 'announcements' | 'logs' | 'security'>('dashboard');
+
+  // Security tab state
+  const [examConfig, setExamConfig] = useState<any>(null);
+  const [examConfigForm, setExamConfigForm] = useState<any>(null);
+  const [savingConfig, setSavingConfig] = useState(false);
+  const [configSaved, setConfigSaved] = useState(false);
+  const [violations, setViolations] = useState<any[]>([]);
+  const [autoSubmissions, setAutoSubmissions] = useState<any[]>([]);
+  const [loadingSecurity, setLoadingSecurity] = useState(false);
+  const [violationSearch, setViolationSearch] = useState('');
+  const [securityDashboard, setSecurityDashboard] = useState<any>(null);
+  const [lockedAssessments, setLockedAssessments] = useState<any[]>([]);
+  const [securityAuditLogs, setSecurityAuditLogs] = useState<any[]>([]);
+  const [securitySubTab, setSecuritySubTab] = useState<'overview' | 'violations' | 'locked' | 'audit' | 'config'>('overview');
+  const [adminActionLoading, setAdminActionLoading] = useState(false);
+  const [extendLockSessionId, setExtendLockSessionId] = useState('');
+  const [extendLockMinutes, setExtendLockMinutes] = useState(15);
+  const [showExtendModal, setShowExtendModal] = useState(false);
 
   // Stats Dashboard state
   const [stats, setStats] = useState<any>(null);
@@ -219,14 +238,148 @@ export default function AdminPortal() {
   const fetchLogsAndTickets = async () => {
     setLoadingLogs(true);
     try {
-      const logs = await apiFetch('/admin/audit-logs');
-      const tickets = await apiFetch('/admin/support');
-      if (logs) setAuditLogs(logs);
-      if (tickets) setSupportRequests(tickets);
+      const [logsData, ticketsData] = await Promise.all([
+        apiFetch('/admin/audit-logs').catch(() => []),
+        apiFetch('/admin/support').catch(() => [])
+      ]);
+      setAuditLogs(Array.isArray(logsData) ? logsData : []);
+      setSupportRequests(Array.isArray(ticketsData) ? ticketsData : []);
     } catch (err: any) {
       triggerToast('error', 'Failed to load support logs');
     } finally {
       setLoadingLogs(false);
+    }
+  };
+
+  const fetchSecurityData = async () => {
+    setLoadingSecurity(true);
+    try {
+      const [config, viols, autoSubs, dashboard, locked, auditLogs] = await Promise.all([
+        apiFetch('/secure-assessment/config').catch(() => null),
+        apiFetch('/secure-assessment/admin/violations?limit=100').catch(() => ({ logs: [] })),
+        apiFetch('/challenges/secure-mode/auto-submissions').catch(() => []),
+        apiFetch('/secure-assessment/admin/dashboard').catch(() => null),
+        apiFetch('/secure-assessment/admin/locked').catch(() => []),
+        apiFetch('/secure-assessment/admin/audit-logs?limit=50').catch(() => ({ logs: [] })),
+      ]);
+      if (config) {
+        setExamConfig(config);
+        setExamConfigForm({ ...config });
+      }
+      setViolations(Array.isArray(viols?.logs) ? viols.logs : []);
+      setAutoSubmissions(Array.isArray(autoSubs) ? autoSubs : []);
+      setSecurityDashboard(dashboard);
+      setLockedAssessments(Array.isArray(locked) ? locked : []);
+      setSecurityAuditLogs(Array.isArray(auditLogs?.logs) ? auditLogs.logs : []);
+    } catch (err: any) {
+      console.error('Failed to fetch security data:', err);
+    } finally {
+      setLoadingSecurity(false);
+    }
+  };
+
+  const saveExamConfig = async () => {
+    setSavingConfig(true);
+    setConfigSaved(false);
+    try {
+      const updated = await apiFetch('/secure-assessment/admin/config', {
+        method: 'PUT',
+        body: examConfigForm,
+      });
+      setExamConfig(updated);
+      setExamConfigForm({ ...updated });
+      setConfigSaved(true);
+      setTimeout(() => setConfigSaved(false), 3000);
+      triggerToast('success', 'Security configuration saved successfully');
+    } catch (err: any) {
+      triggerToast('error', 'Failed to save config');
+    } finally {
+      setSavingConfig(false);
+    }
+  };
+
+  const adminUnlockAssessment = async (sessionId: string) => {
+    setAdminActionLoading(true);
+    try {
+      await apiFetch('/secure-assessment/admin/unlock', {
+        method: 'POST',
+        body: { sessionId },
+      });
+      triggerToast('success', 'Assessment unlocked successfully');
+      fetchSecurityData();
+    } catch (err: any) {
+      triggerToast('error', err.message || 'Failed to unlock assessment');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  };
+
+  const adminExtendLock = async () => {
+    if (!extendLockSessionId) return;
+    setAdminActionLoading(true);
+    try {
+      await apiFetch('/secure-assessment/admin/extend-lock', {
+        method: 'POST',
+        body: { sessionId: extendLockSessionId, extraMinutes: extendLockMinutes },
+      });
+      triggerToast('success', `Lock extended by ${extendLockMinutes} minutes`);
+      setShowExtendModal(false);
+      fetchSecurityData();
+    } catch (err: any) {
+      triggerToast('error', err.message || 'Failed to extend lock');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  };
+
+  const adminResetViolations = async (sessionId: string) => {
+    setAdminActionLoading(true);
+    try {
+      await apiFetch('/secure-assessment/admin/reset-violations', {
+        method: 'POST',
+        body: { sessionId },
+      });
+      triggerToast('success', 'Violation count reset');
+      fetchSecurityData();
+    } catch (err: any) {
+      triggerToast('error', 'Failed to reset violations');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  };
+
+  const adminIgnoreViolation = async (violationId: string) => {
+    setAdminActionLoading(true);
+    try {
+      await apiFetch('/secure-assessment/admin/ignore-violation', {
+        method: 'POST',
+        body: { violationId },
+      });
+      triggerToast('success', 'Violation ignored');
+      fetchSecurityData();
+    } catch (err: any) {
+      triggerToast('error', 'Failed to ignore violation');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  };
+
+  const exportViolations = async (format: 'json' | 'csv') => {
+    try {
+      const data = await apiFetch(`/secure-assessment/admin/export?format=${format}`);
+      const blob = new Blob(
+        [format === 'csv' ? data : JSON.stringify(data, null, 2)],
+        { type: format === 'csv' ? 'text/csv' : 'application/json' }
+      );
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `violation-logs.${format}`;
+      a.click();
+      URL.revokeObjectURL(url);
+      triggerToast('success', `Violations exported as ${format.toUpperCase()}`);
+    } catch (err: any) {
+      triggerToast('error', 'Failed to export violations');
     }
   };
 
@@ -237,6 +390,7 @@ export default function AdminPortal() {
     if (activeTab === 'users') fetchUsers();
     if (activeTab === 'content') fetchProblems();
     if (activeTab === 'logs') fetchLogsAndTickets();
+    if (activeTab === 'security') fetchSecurityData();
   }, [activeTab, isAuthenticated]);
 
   // Unlock day/module overrides
@@ -910,6 +1064,18 @@ export default function AdminPortal() {
           >
             <Terminal className="w-4 h-4" />
             <span>Audit Trail & Support</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('security')}
+            className={`w-full p-3 rounded-xl text-xs font-bold flex items-center gap-3 transition-all cursor-pointer ${
+              activeTab === 'security'
+                ? theme === 'light' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/10' : 'bg-indigo-600 text-white'
+                : theme === 'light' ? 'bg-white border border-zinc-200 hover:bg-zinc-100 text-zinc-650' : 'bg-zinc-900 border border-zinc-850 hover:bg-zinc-850 text-zinc-400'
+            }`}
+          >
+            <ShieldAlert className="w-4 h-4" />
+            <span>Exam Security</span>
           </button>
         </aside>
 
@@ -2071,6 +2237,494 @@ export default function AdminPortal() {
             </div>
           )}
 
+          {/* TAB 7: EXAM SECURITY */}
+          {activeTab === 'security' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-xl font-black">Exam Security Dashboard</h2>
+                  <p className={`text-xs mt-1 ${theme === 'light' ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    Monitor violations, manage locked assessments, and configure security rules.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => exportViolations('csv')}
+                    className={`px-3 py-2 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
+                      theme === 'light' ? 'bg-white border-zinc-200 hover:bg-zinc-50 text-zinc-700' : 'bg-zinc-900 border-zinc-850 hover:bg-zinc-800 text-zinc-300'
+                    }`}
+                  >
+                    Export CSV
+                  </button>
+                  <button
+                    onClick={() => exportViolations('json')}
+                    className={`px-3 py-2 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
+                      theme === 'light' ? 'bg-white border-zinc-200 hover:bg-zinc-50 text-zinc-700' : 'bg-zinc-900 border-zinc-850 hover:bg-zinc-800 text-zinc-300'
+                    }`}
+                  >
+                    Export JSON
+                  </button>
+                  <button
+                    onClick={fetchSecurityData}
+                    disabled={loadingSecurity}
+                    className={`p-2.5 rounded-lg border flex items-center gap-2 text-xs font-bold transition-all cursor-pointer ${
+                      theme === 'light' ? 'bg-white border-zinc-200 hover:bg-zinc-50 text-zinc-800' : 'bg-zinc-900 border-zinc-850 hover:bg-zinc-800 text-zinc-200'
+                    }`}
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${loadingSecurity ? 'animate-spin' : ''}`} />
+                    <span>Refresh</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Sub-tab Navigation */}
+              <div className={`flex gap-1 p-1 rounded-xl border ${theme === 'light' ? 'bg-zinc-100 border-zinc-200' : 'bg-zinc-900 border-zinc-800'}`}>
+                {[
+                  { id: 'overview', label: 'Overview', icon: BarChart2 },
+                  { id: 'violations', label: 'Violations', icon: AlertTriangle },
+                  { id: 'locked', label: 'Locked', icon: Lock },
+                  { id: 'audit', label: 'Audit Log', icon: Shield },
+                  { id: 'config', label: 'Configuration', icon: Settings },
+                ].map(tab => {
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setSecuritySubTab(tab.id as any)}
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        securitySubTab === tab.id
+                          ? 'bg-indigo-600 text-white shadow-sm'
+                          : 'text-zinc-400 hover:text-zinc-200'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      {tab.label}
+                      {tab.id === 'locked' && lockedAssessments.length > 0 && (
+                        <span className="px-1.5 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px]">{lockedAssessments.length}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Overview Sub-tab */}
+              {securitySubTab === 'overview' && (
+                <div className="space-y-6">
+                  {/* Stats Cards */}
+                  {securityDashboard ? (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {[
+                        { label: 'Total Violations', value: securityDashboard.totalViolations, icon: AlertTriangle, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+                        { label: 'Locked Assessments', value: securityDashboard.lockedAssessments, icon: Lock, color: 'text-red-400', bg: 'bg-red-500/10' },
+                        { label: 'Currently Locked', value: securityDashboard.currentlyLockedUsers, icon: ShieldAlert, color: 'text-orange-400', bg: 'bg-orange-500/10' },
+                        { label: 'Active Sessions', value: securityDashboard.activeSessions, icon: Play, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+                        { label: 'Total Sessions', value: securityDashboard.totalSessions, icon: BarChart2, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+                        { label: "Today's Violations", value: securityDashboard.violationsToday, icon: TrendingUp, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+                        { label: 'Repeat Offenders', value: securityDashboard.repeatOffenders?.length || 0, icon: Users, color: 'text-rose-400', bg: 'bg-rose-500/10' },
+                        { label: 'Violation Types', value: securityDashboard.mostCommonViolations?.length || 0, icon: Filter, color: 'text-violet-400', bg: 'bg-violet-500/10' },
+                      ].map((stat, i) => {
+                        const StatIcon = stat.icon;
+                        return (
+                          <div key={i} className={`p-4 rounded-xl border ${theme === 'light' ? 'bg-white border-zinc-200' : 'bg-zinc-900 border-zinc-850'}`}>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className={`text-[10px] font-extrabold uppercase ${theme === 'light' ? 'text-zinc-500' : 'text-zinc-500'}`}>{stat.label}</span>
+                              <div className={`w-8 h-8 rounded-lg ${stat.bg} flex items-center justify-center`}>
+                                <StatIcon className={`w-4 h-4 ${stat.color}`} />
+                              </div>
+                            </div>
+                            <p className="text-2xl font-black text-white">{stat.value}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="h-32 flex items-center justify-center">
+                      <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
+                    </div>
+                  )}
+
+                  {/* Most Common Violation Types */}
+                  {securityDashboard?.mostCommonViolations?.length > 0 && (
+                    <div className={`p-6 rounded-2xl border ${theme === 'light' ? 'bg-white border-zinc-200 shadow-sm' : 'bg-zinc-900 border-zinc-850'}`}>
+                      <h3 className={`text-base font-black flex items-center gap-2 mb-4 ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`}>
+                        <AlertTriangle className="w-5 h-5 text-amber-400" />
+                        Most Common Violation Types
+                      </h3>
+                      <div className="space-y-2.5">
+                        {securityDashboard.mostCommonViolations.map((v: any, i: number) => {
+                          const maxCount = Math.max(...securityDashboard.mostCommonViolations.map((x: any) => x.count));
+                          const pct = Math.round((v.count / maxCount) * 100);
+                          return (
+                            <div key={i} className="space-y-1">
+                              <div className="flex justify-between text-xs">
+                                <span className={`font-bold ${theme === 'light' ? 'text-zinc-700' : 'text-zinc-300'}`}>{v.type.replace(/_/g, ' ')}</span>
+                                <span className="text-zinc-500">{v.count}</span>
+                              </div>
+                              <div className={`h-2 rounded-full overflow-hidden ${theme === 'light' ? 'bg-zinc-100' : 'bg-zinc-800'}`}>
+                                <div
+                                  className="h-full rounded-full bg-gradient-to-r from-amber-500 to-red-500 transition-all"
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Repeat Offenders */}
+                  {securityDashboard?.repeatOffenders?.length > 0 && (
+                    <div className={`p-6 rounded-2xl border ${theme === 'light' ? 'bg-white border-zinc-200 shadow-sm' : 'bg-zinc-900 border-zinc-850'}`}>
+                      <h3 className={`text-base font-black flex items-center gap-2 mb-4 ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`}>
+                        <Users className="w-5 h-5 text-rose-400" />
+                        Repeat Offenders
+                      </h3>
+                      <div className="space-y-2">
+                        {securityDashboard.repeatOffenders.map((o: any, i: number) => (
+                          <div key={i} className={`flex items-center justify-between p-3 rounded-xl border ${theme === 'light' ? 'bg-zinc-50 border-zinc-200' : 'bg-zinc-950/40 border-zinc-850'}`}>
+                            <div className="flex items-center gap-3">
+                              <span className="text-zinc-500 text-xs font-bold w-5">{i + 1}</span>
+                              <div>
+                                <p className="text-xs font-bold text-zinc-300">{o.user?.profile?.name || 'Unknown'}</p>
+                                <p className="text-[10px] text-zinc-500">{o.user?.email}</p>
+                              </div>
+                            </div>
+                            <span className="px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-400 text-[10px] font-bold">{o.violationCount} violations</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Recent Violations */}
+                  {securityDashboard?.recentViolations?.length > 0 && (
+                    <div className={`p-6 rounded-2xl border ${theme === 'light' ? 'bg-white border-zinc-200 shadow-sm' : 'bg-zinc-900 border-zinc-850'}`}>
+                      <h3 className={`text-base font-black flex items-center gap-2 mb-4 ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`}>
+                        <ShieldAlert className="w-5 h-5 text-amber-400" />
+                        Recent Violations
+                      </h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-[11px]">
+                          <thead>
+                            <tr className={`border-b ${theme === 'light' ? 'border-zinc-200' : 'border-zinc-800'}`}>
+                              {['User', 'Type', 'Problem', 'Time'].map(h => (
+                                <th key={h} className="text-left pb-2 pr-4 font-extrabold uppercase text-zinc-500 text-[10px]">{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-zinc-800/50">
+                            {securityDashboard.recentViolations.map((v: any) => (
+                              <tr key={v.id} className={`transition-colors ${theme === 'light' ? 'hover:bg-zinc-50' : 'hover:bg-zinc-800/30'}`}>
+                                <td className="py-2 pr-4">
+                                  <span className="text-zinc-300 font-semibold">{v.user?.profile?.name || 'Unknown'}</span>
+                                </td>
+                                <td className="py-2 pr-4">
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                    v.violationType === 'TAB_SWITCH' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                                    v.violationType === 'EXIT_FULLSCREEN' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' :
+                                    v.violationType === 'DEVTOOLS' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                    'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                                  }`}>{v.violationType}</span>
+                                </td>
+                                <td className="py-2 pr-4 text-zinc-400">{v.problem?.title}</td>
+                                <td className="py-2 text-zinc-600">{new Date(v.createdAt).toLocaleString()}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Violations Sub-tab */}
+              {securitySubTab === 'violations' && (
+                <div className={`p-6 rounded-2xl border space-y-4 ${theme === 'light' ? 'bg-white border-zinc-200 shadow-sm' : 'bg-zinc-900 border-zinc-850'}`}>
+                  <div className="flex items-center justify-between">
+                    <h3 className={`text-base font-black flex items-center gap-2 ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`}>
+                      <AlertTriangle className="w-5 h-5 text-amber-400" />
+                      Violation Logs
+                      <span className="ml-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px]">{violations.length}</span>
+                    </h3>
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs ${theme === 'light' ? 'bg-zinc-50 border-zinc-200' : 'bg-zinc-950 border-zinc-800'}`}>
+                      <Search className="w-3 h-3 text-zinc-400" />
+                      <input type="text" placeholder="Search..." value={violationSearch} onChange={e => setViolationSearch(e.target.value)} className="bg-transparent outline-none text-xs w-40" />
+                    </div>
+                  </div>
+                  {loadingSecurity ? (
+                    <div className="h-24 flex items-center justify-center"><Loader2 className="w-5 h-5 text-indigo-500 animate-spin" /></div>
+                  ) : violations.length === 0 ? (
+                    <p className="text-xs text-zinc-500 font-mono">No violations recorded yet.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-[11px]">
+                        <thead>
+                          <tr className={`border-b ${theme === 'light' ? 'border-zinc-200' : 'border-zinc-800'}`}>
+                            {['Student', 'Problem', 'Type', 'Count', 'Browser', 'OS', 'Session', 'Time', 'Actions'].map(h => (
+                              <th key={h} className="text-left pb-2 pr-4 font-extrabold uppercase text-zinc-500 text-[10px]">{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-800/50">
+                          {violations
+                            .filter(v =>
+                              !violationSearch ||
+                              v.user?.email?.toLowerCase().includes(violationSearch.toLowerCase()) ||
+                              v.violationType?.toLowerCase().includes(violationSearch.toLowerCase()) ||
+                              v.user?.profile?.name?.toLowerCase().includes(violationSearch.toLowerCase())
+                            )
+                            .map(v => (
+                              <tr key={v.id} className={`transition-colors ${theme === 'light' ? 'hover:bg-zinc-50' : 'hover:bg-zinc-800/30'}`}>
+                                <td className="py-2 pr-4">
+                                  <div className="font-semibold text-zinc-300">{v.user?.profile?.name ?? 'Unknown'}</div>
+                                  <div className="text-zinc-500">{v.user?.email}</div>
+                                </td>
+                                <td className="py-2 pr-4 text-zinc-400 max-w-[120px] truncate">{v.problem?.title}</td>
+                                <td className="py-2 pr-4">
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                    v.violationType === 'TAB_SWITCH' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                                    v.violationType === 'EXIT_FULLSCREEN' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' :
+                                    v.violationType === 'DEVTOOLS' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                    'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                                  }`}>{v.violationType}</span>
+                                </td>
+                                <td className="py-2 pr-4 font-bold text-amber-400">{v.totalCount}</td>
+                                <td className="py-2 pr-4 text-zinc-500">{v.browser}</td>
+                                <td className="py-2 pr-4 text-zinc-500">{v.os}</td>
+                                <td className="py-2 pr-4 text-zinc-500">{v.session?.status || '-'}</td>
+                                <td className="py-2 pr-4 text-zinc-600 text-[10px]">{new Date(v.createdAt).toLocaleString()}</td>
+                                <td className="py-2">
+                                  <button
+                                    onClick={() => adminIgnoreViolation(v.id)}
+                                    disabled={adminActionLoading}
+                                    className="text-[10px] px-2 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 transition-colors cursor-pointer"
+                                  >
+                                    Ignore
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Locked Assessments Sub-tab */}
+              {securitySubTab === 'locked' && (
+                <div className={`p-6 rounded-2xl border space-y-4 ${theme === 'light' ? 'bg-white border-zinc-200 shadow-sm' : 'bg-zinc-900 border-zinc-850'}`}>
+                  <h3 className={`text-base font-black flex items-center gap-2 ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`}>
+                    <Lock className="w-5 h-5 text-red-400" />
+                    Locked Assessments
+                    <span className="ml-1 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px]">{lockedAssessments.length}</span>
+                  </h3>
+                  {loadingSecurity ? (
+                    <div className="h-24 flex items-center justify-center"><Loader2 className="w-5 h-5 text-indigo-500 animate-spin" /></div>
+                  ) : lockedAssessments.length === 0 ? (
+                    <p className="text-xs text-zinc-500 font-mono">No locked assessments.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-[11px]">
+                        <thead>
+                          <tr className={`border-b ${theme === 'light' ? 'border-zinc-200' : 'border-zinc-800'}`}>
+                            {['Student', 'Problem', 'Locked At', 'Duration', 'Unlocks At', 'Violations', 'Actions'].map(h => (
+                              <th key={h} className="text-left pb-2 pr-4 font-extrabold uppercase text-zinc-500 text-[10px]">{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-800/50">
+                          {lockedAssessments.map((a: any) => {
+                            const remainingSec = a.unlocksAt ? Math.max(0, Math.floor((new Date(a.unlocksAt).getTime() - Date.now()) / 1000)) : 0;
+                            const remainingMin = Math.floor(remainingSec / 60);
+                            const remainingStr = remainingMin > 0 ? `${remainingMin}m` : '<1m';
+                            return (
+                              <tr key={a.id} className={`transition-colors ${theme === 'light' ? 'hover:bg-zinc-50' : 'hover:bg-zinc-800/30'}`}>
+                                <td className="py-2 pr-4">
+                                  <div className="font-semibold text-zinc-300">{a.user?.profile?.name || 'Unknown'}</div>
+                                  <div className="text-zinc-500">{a.user?.email}</div>
+                                </td>
+                                <td className="py-2 pr-4 text-zinc-400">{a.problem?.title}</td>
+                                <td className="py-2 pr-4 text-zinc-500 text-[10px]">{new Date(a.lockedAt).toLocaleString()}</td>
+                                <td className="py-2 pr-4 text-zinc-400">{a.lockDuration} min</td>
+                                <td className="py-2 pr-4">
+                                  <span className={remainingSec > 0 ? 'text-red-400 font-bold' : 'text-emerald-400'}>{remainingStr}</span>
+                                  <span className="text-zinc-600 text-[10px] ml-1">{a.unlocksAt ? new Date(a.unlocksAt).toLocaleTimeString() : '-'}</span>
+                                </td>
+                                <td className="py-2 pr-4 text-amber-400 font-bold">{a.violationCount}/{a.maxViolations}</td>
+                                <td className="py-2">
+                                  <div className="flex gap-1.5">
+                                    <button
+                                      onClick={() => adminUnlockAssessment(a.id)}
+                                      disabled={adminActionLoading}
+                                      className="text-[10px] px-2 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 transition-colors cursor-pointer"
+                                    >
+                                      Unlock
+                                    </button>
+                                    <button
+                                      onClick={() => { setExtendLockSessionId(a.id); setShowExtendModal(true); }}
+                                      className="text-[10px] px-2 py-1 rounded-lg bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 transition-colors cursor-pointer"
+                                    >
+                                      Extend
+                                    </button>
+                                    <button
+                                      onClick={() => adminResetViolations(a.id)}
+                                      disabled={adminActionLoading}
+                                      className="text-[10px] px-2 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 transition-colors cursor-pointer"
+                                    >
+                                      Reset
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Audit Log Sub-tab */}
+              {securitySubTab === 'audit' && (
+                <div className={`p-6 rounded-2xl border space-y-4 ${theme === 'light' ? 'bg-white border-zinc-200 shadow-sm' : 'bg-zinc-900 border-zinc-850'}`}>
+                  <h3 className={`text-base font-black flex items-center gap-2 ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`}>
+                    <Shield className="w-5 h-5 text-indigo-400" />
+                    Security Audit Log
+                    <span className="ml-1 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px]">{securityAuditLogs.length}</span>
+                  </h3>
+                  {loadingSecurity ? (
+                    <div className="h-24 flex items-center justify-center"><Loader2 className="w-5 h-5 text-indigo-500 animate-spin" /></div>
+                  ) : securityAuditLogs.length === 0 ? (
+                    <p className="text-xs text-zinc-500 font-mono">No security events recorded yet.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-[11px]">
+                        <thead>
+                          <tr className={`border-b ${theme === 'light' ? 'border-zinc-200' : 'border-zinc-800'}`}>
+                            {['User', 'Action', 'Details', 'IP Address', 'Timestamp'].map(h => (
+                              <th key={h} className="text-left pb-2 pr-4 font-extrabold uppercase text-zinc-500 text-[10px]">{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-800/50">
+                          {securityAuditLogs.map((e: any) => (
+                            <tr key={e.id} className={`transition-colors ${theme === 'light' ? 'hover:bg-zinc-50' : 'hover:bg-zinc-800/30'}`}>
+                              <td className="py-2 pr-4 text-zinc-300">{e.user?.profile?.name || e.user?.email || 'System'}</td>
+                              <td className="py-2 pr-4">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                  e.action.includes('LOCKED') || e.action.includes('VIOLATION') ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                                  e.action.includes('UNLOCKED') || e.action.includes('RESUMED') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                  e.action.includes('STARTED') || e.action.includes('SUBMITTED') ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' :
+                                  'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                                }`}>{e.action}</span>
+                              </td>
+                              <td className="py-2 pr-4 text-zinc-500 max-w-[200px] truncate">{e.details}</td>
+                              <td className="py-2 pr-4 text-zinc-600">{e.ipAddress || '-'}</td>
+                              <td className="py-2 text-zinc-600 text-[10px]">{new Date(e.createdAt).toLocaleString()}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Configuration Sub-tab */}
+              {securitySubTab === 'config' && (
+                <div className={`p-6 rounded-2xl border space-y-5 ${theme === 'light' ? 'bg-white border-zinc-200 shadow-sm' : 'bg-zinc-900 border-zinc-850'}`}>
+                  <h3 className={`text-base font-black flex items-center gap-2 ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`}>
+                    <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                    Secure Mode Configuration
+                  </h3>
+
+                  {loadingSecurity ? (
+                    <div className="h-24 flex items-center justify-center"><Loader2 className="w-5 h-5 text-indigo-500 animate-spin" /></div>
+                  ) : !examConfigForm ? (
+                    <p className="text-xs text-zinc-500">No configuration found. Refresh to load defaults.</p>
+                  ) : (
+                    <div className="space-y-5">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-extrabold uppercase text-zinc-400">Max Violations</label>
+                          <input type="number" min={1} max={10} value={examConfigForm.maxViolations ?? 3} onChange={e => setExamConfigForm((p: any) => ({ ...p, maxViolations: parseInt(e.target.value) }))}
+                            className={`w-32 p-2.5 rounded-lg border text-xs outline-none ${theme === 'light' ? 'bg-zinc-50 border-zinc-200 text-zinc-900' : 'bg-zinc-950 border-zinc-800 text-white'}`} />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-extrabold uppercase text-zinc-400">Lock Duration (minutes)</label>
+                          <input type="number" min={1} max={120} value={examConfigForm.lockDurationMinutes ?? 30} onChange={e => setExamConfigForm((p: any) => ({ ...p, lockDurationMinutes: parseInt(e.target.value) }))}
+                            className={`w-32 p-2.5 rounded-lg border text-xs outline-none ${theme === 'light' ? 'bg-zinc-50 border-zinc-200 text-zinc-900' : 'bg-zinc-950 border-zinc-800 text-white'}`} />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-extrabold uppercase text-zinc-400">Auto-Save Interval (seconds)</label>
+                          <input type="number" min={5} max={120} value={examConfigForm.autoSaveInterval ?? 15} onChange={e => setExamConfigForm((p: any) => ({ ...p, autoSaveInterval: parseInt(e.target.value) }))}
+                            className={`w-32 p-2.5 rounded-lg border text-xs outline-none ${theme === 'light' ? 'bg-zinc-50 border-zinc-200 text-zinc-900' : 'bg-zinc-950 border-zinc-800 text-white'}`} />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-extrabold uppercase text-zinc-400">Violation Reset Policy</label>
+                          <select value={examConfigForm.violationResetPolicy ?? 'AFTER_ASSESSMENT'} onChange={e => setExamConfigForm((p: any) => ({ ...p, violationResetPolicy: e.target.value }))}
+                            className={`w-full p-2.5 rounded-lg border text-xs outline-none ${theme === 'light' ? 'bg-zinc-50 border-zinc-200 text-zinc-900' : 'bg-zinc-950 border-zinc-800 text-white'}`}>
+                            <option value="AFTER_ASSESSMENT">After Assessment Ends</option>
+                            <option value="MANUAL">Manual Only (Admin)</option>
+                            <option value="DAILY">Daily Reset</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {[
+                          { key: 'fullscreenEnabled', label: 'Enforce Fullscreen' },
+                          { key: 'tabSwitchEnabled', label: 'Detect Tab Switch' },
+                          { key: 'copyPasteDisabled', label: 'Disable Copy/Paste' },
+                          { key: 'rightClickDisabled', label: 'Block Right Click' },
+                          { key: 'devToolsDisabled', label: 'Block DevTools Keys' },
+                          { key: 'windowFocusDetection', label: 'Window Focus Detection' },
+                          { key: 'enforceFullScreen', label: 'Require Full Screen' },
+                          { key: 'autoSaveEnabled', label: 'Enable Auto-Save' },
+                        ].map(({ key, label }) => (
+                          <label key={key} className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-colors ${
+                            examConfigForm[key]
+                              ? 'border-emerald-500/30 bg-emerald-500/5 text-emerald-400'
+                              : theme === 'light' ? 'border-zinc-200 bg-zinc-50 text-zinc-500' : 'border-zinc-800 bg-zinc-950/40 text-zinc-500'
+                          }`}>
+                            <input type="checkbox" className="accent-emerald-500" checked={!!examConfigForm[key]}
+                              onChange={e => setExamConfigForm((p: any) => ({ ...p, [key]: e.target.checked }))} />
+                            <span className="text-xs font-semibold">{label}</span>
+                          </label>
+                        ))}
+                      </div>
+
+                      {(['warningMsg1', 'warningMsg2', 'warningMsg3'] as const).map((key, i) => (
+                        <div key={key} className="space-y-1.5">
+                          <label className={`text-[10px] font-extrabold uppercase ${i === 0 ? 'text-amber-400' : i === 1 ? 'text-orange-400' : 'text-red-400'}`}>
+                            Warning Message {i + 1} {i === 2 ? '(Final / Auto-Submit)' : ''}
+                          </label>
+                          <textarea rows={2} value={examConfigForm[key] ?? ''}
+                            onChange={e => setExamConfigForm((p: any) => ({ ...p, [key]: e.target.value }))}
+                            className={`w-full p-2.5 rounded-lg border text-xs outline-none resize-none ${theme === 'light' ? 'bg-zinc-50 border-zinc-200 text-zinc-900' : 'bg-zinc-950 border-zinc-800 text-white'}`} />
+                        </div>
+                      ))}
+
+                      <div className="flex items-center gap-3">
+                        <button onClick={saveExamConfig} disabled={savingConfig}
+                          className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 transition-all rounded-xl text-white text-xs font-bold cursor-pointer">
+                          {savingConfig ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          Save Configuration
+                        </button>
+                        {configSaved && <span className="text-emerald-400 text-xs font-semibold flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5" /> Saved!</span>}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+            </div>
+          )}
+
         </main>
       </div>
 
@@ -2154,6 +2808,47 @@ export default function AdminPortal() {
         </div>
       )}
 
+      {/* Extend Lock Modal */}
+      {showExtendModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur flex items-center justify-center p-4">
+          <div className={`max-w-sm w-full p-6 rounded-2xl border shadow-2xl space-y-4 ${theme === 'light' ? 'bg-white border-zinc-250 text-zinc-900' : 'bg-zinc-900 border-zinc-850 text-white'}`}>
+            <h3 className="text-lg font-black">Extend Lock Duration</h3>
+            <p className="text-xs text-zinc-400">Increase the lock time for this assessment session.</p>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-extrabold uppercase text-zinc-400">Additional Minutes</label>
+              <select
+                value={extendLockMinutes}
+                onChange={e => setExtendLockMinutes(parseInt(e.target.value))}
+                className={`w-full p-2.5 rounded-lg border text-xs outline-none ${theme === 'light' ? 'bg-zinc-50 border-zinc-200 text-zinc-900' : 'bg-zinc-950 border-zinc-800 text-white'}`}
+              >
+                <option value={5}>5 minutes</option>
+                <option value={10}>10 minutes</option>
+                <option value={15}>15 minutes</option>
+                <option value={30}>30 minutes</option>
+                <option value={60}>60 minutes</option>
+                <option value={120}>120 minutes</option>
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowExtendModal(false)}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors cursor-pointer ${
+                  theme === 'light' ? 'border-zinc-300 text-zinc-700 hover:bg-zinc-100' : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={adminExtendLock}
+                disabled={adminActionLoading}
+                className="flex-1 py-2.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-60 rounded-xl text-sm font-bold text-white transition-colors cursor-pointer"
+              >
+                {adminActionLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Extend Lock'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

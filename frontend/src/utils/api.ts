@@ -35,6 +35,14 @@ export async function apiFetch(endpoint: string, options: ApiOptions = {}) {
   });
 
   if (!response.ok) {
+    if (response.status === 401 && typeof window !== 'undefined') {
+      localStorage.removeItem(tokenKey);
+      if (tokenKey === 'ssp_admin_token') {
+        window.location.href = '/admin';
+      } else {
+        window.location.href = '/auth';
+      }
+    }
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || `API Error: ${response.status}`);
   }

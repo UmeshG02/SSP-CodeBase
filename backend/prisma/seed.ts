@@ -1,6 +1,7 @@
 import { PrismaClient, Difficulty, ChallengeType } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+import * as bcrypt from 'bcrypt';
 import 'dotenv/config';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -95,7 +96,47 @@ async function main() {
   await prisma.week.deleteMany({});
   await prisma.learningPath.deleteMany({});
 
-  // 2. Setup Learning Path
+  // 2. Seed Admin Users
+  console.log('Seeding admin users...');
+  const adminPasswordHash = await bcrypt.hash('password123', 10);
+  const admins = [
+    { email: 'admin@ssp.com', role: 'SUPER_ADMIN' as const, name: 'Super Admin', username: 'superadmin' },
+    { email: 'moderator@ssp.com', role: 'MODERATOR' as const, name: 'Moderator', username: 'moderator' },
+  ];
+  for (const a of admins) {
+    await prisma.user.upsert({
+      where: { email: a.email },
+      update: { passwordHash: adminPasswordHash, role: a.role },
+      create: {
+        email: a.email,
+        passwordHash: adminPasswordHash,
+        role: a.role,
+        profile: {
+          create: {
+            name: a.name,
+            username: a.username,
+            avatarUrl: `https://api.dicebear.com/7.x/pixel-art/svg?seed=${a.username}`,
+            skills: ['Administration'],
+            prefLang: 'JavaScript',
+            expLevel: 'Expert',
+            xp: 0,
+            coins: 0,
+            level: 1,
+          },
+        },
+        streaks: {
+          create: {
+            currentStreak: 0,
+            longestStreak: 0,
+            lastActive: new Date(),
+          },
+        },
+      },
+    });
+  }
+  console.log(`Admin users seeded: ${admins.map(a => a.email).join(', ')}`);
+
+  // 3. Setup Learning Path
   console.log('Creating Python Learning Path...');
   const path = await prisma.learningPath.create({
     data: {
@@ -127,13 +168,14 @@ async function main() {
           tags: ['Variables', 'Math'],
           t1: 'int fahrenheit',
           t2: 'int',
-          desc: 'Given a temperature in Fahrenheit, convert it to Celsius using the formula: C = (F - 32) * 5/9.',
+          desc: 'Given a temperature in Fahrenheit, convert it to Celsius using the formula: C = (F - 32) * 5/9. Round the result to the nearest integer using `round()`.',
           s0_in: '77',
           s0_out: '25',
-          s0_exp: 'C = (77 - 32) * 5/9 = 25.',
+          s0_exp: 'C = (77 - 32) * 5/9 = 25.0. round(25.0) = 25.',
           s1_in: '32',
           s1_out: '0',
-          s1_exp: 'C = (32 - 32) * 5/9 = 0.',
+          s1_exp: 'C = (32 - 32) * 5/9 = 0. round(0) = 0.',
+          testInputs: [77, 32, 100, 212, 50],
           fn: (f: number) => Math.round((f - 32) * 5 / 9)
         },
         {

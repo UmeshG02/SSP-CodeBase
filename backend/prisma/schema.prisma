@@ -49,6 +49,9 @@ model User {
   likes          Like[]
   learningProgress UserProgress[]
   dayProgress      UserDayProgress[]
+  violationLogs    ViolationLog[]
+  assessmentSessions AssessmentSession[]
+  securityEvents     SecurityEvent[]
 }
 
 model Profile {
@@ -88,8 +91,10 @@ model Problem {
   testCases    TestCase[]
   submissions  Submission[]
   comments     Comment[]
-  dayId        String?
-  day          Day?          @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  violationLogs   ViolationLog[]
+  assessmentSessions AssessmentSession[]
+  dayId            String?
+  day              Day?              @relation(fields: [dayId], references: [id], onDelete: Cascade)
 }
 
 model TestCase {
@@ -109,10 +114,12 @@ model Submission {
   problem    Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
   language   String
   code       String   @db.Text
-  status     String   // e.g. "ACCEPTED", "WRONG_ANSWER", "RUNTIME_ERROR", "COMPILE_ERROR"
-  runtime    Float?   // in ms
-  memory     Float?   // in KB
-  createdAt  DateTime @default(now())
+  status           String   // e.g. "ACCEPTED", "WRONG_ANSWER", "RUNTIME_ERROR", "COMPILE_ERROR"
+  runtime          Float?   // in ms
+  memory           Float?   // in KB
+  autoSubmitted    Boolean  @default(false)
+  autoSubmitReason String?  @db.Text
+  createdAt        DateTime @default(now())
 }
 
 model Streak {
@@ -297,5 +304,115 @@ model SupportRequest {
   status    String   @default("PENDING") // "PENDING", "IN_PROGRESS", "RESOLVED"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ExamConfig {
+  id                    String   @id @default(uuid())
+  maxViolations         Int      @default(3)
+  fullscreenEnabled     Boolean  @default(true)
+  tabSwitchEnabled      Boolean  @default(true)
+  copyPasteDisabled     Boolean  @default(true)
+  rightClickDisabled    Boolean  @default(true)
+  devToolsDisabled      Boolean  @default(true)
+  resizeWarningsEnabled Boolean  @default(true)
+  autoSaveEnabled       Boolean  @default(true)
+  autoSaveInterval      Int      @default(15)
+  windowFocusDetection  Boolean  @default(true)
+  enforceFullScreen     Boolean  @default(true)
+  lockDurationMinutes   Int      @default(30)
+  availableLockDurations Int[]   @default([10, 15, 30, 60])
+  violationResetPolicy  String   @default("AFTER_ASSESSMENT")
+  warningMsg1           String   @default("Warning 1 of 3: You have left the exam window. Please return immediately.")
+  warningMsg2           String   @default("Warning 2 of 3: One more violation will automatically submit your assessment.")
+  warningMsg3           String   @default("Your assessment has been automatically submitted because the maximum number of security violations was reached.")
+  updatedAt             DateTime @updatedAt
+}
+
+model AssessmentSession {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId       String
+  problem         Problem   @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  status          String    @default("ACTIVE")
+  startTime       DateTime  @default(now())
+  endTime         DateTime?
+  violationCount  Int       @default(0)
+  maxViolations   Int       @default(3)
+  lockDuration    Int       @default(30)
+  lockedAt        DateTime?
+  unlocksAt       DateTime?
+  currentCode     String?   @db.Text
+  currentLanguage String?
+  currentQuestion Int       @default(0)
+  totalQuestions  Int       @default(1)
+  timeSpent       Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  violationLogs   ViolationLog[]
+  lockHistory     LockHistory[]
+  autoSaves       AutoSave[]
+
+  @@unique([userId, problemId, status])
+}
+
+model ViolationLog {
+  id                 String             @id @default(uuid())
+  userId             String
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId          String
+  problem            Problem            @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  sessionId          String?
+  session            AssessmentSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  violationType      String
+  details            String?            @db.Text
+  totalCount         Int
+  browser            String
+  os                 String
+  ipAddress          String?
+  assessmentDuration Int?
+  remainingTime      Int?
+  lockStatus         String?
+  module             String?
+  day                String?
+  questionNumber     Int?
+  createdAt          DateTime           @default(now())
+}
+
+model LockHistory {
+  id           String             @id @default(uuid())
+  sessionId    String
+  session      AssessmentSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  lockedAt     DateTime           @default(now())
+  scheduledUnlockAt DateTime?
+  unlockedAt   DateTime?
+  unlockReason String?
+  duration     Int                @default(30)
+  createdBy    String?            @default("SYSTEM")
+  createdAt    DateTime           @default(now())
+}
+
+model AutoSave {
+  id             String             @id @default(uuid())
+  sessionId      String
+  session        AssessmentSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  code           String             @db.Text
+  language       String?
+  questionNumber Int?
+  questionType   String?
+  metadata       String?            @db.Text
+  createdAt      DateTime           @default(now())
+}
+
+model SecurityEvent {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action        String
+  details       String?  @db.Text
+  ipAddress     String?
+  userAgent     String?
+  metadata      String?  @db.Text
+  createdAt     DateTime @default(now())
 }
 

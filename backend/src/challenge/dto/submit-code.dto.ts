@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SubmitCodeDto {
@@ -11,4 +11,13 @@ export class SubmitCodeDto {
   @IsString()
   @IsNotEmpty()
   code: string;
+
+  @ApiProperty({ example: false, required: false })
+  @IsOptional()
+  autoSubmitted?: boolean;
+
+  @ApiProperty({ example: 'Auto Submitted due to violations.', required: false })
+  @IsString()
+  @IsOptional()
+  autoSubmitReason?: string;
 }
