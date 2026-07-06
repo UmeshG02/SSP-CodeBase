@@ -45,7 +45,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-zinc-400 text-lg sm:text-xl max-w-lg leading-relaxed">
-            Practice programming, SQL queries, and system design challenges. Stay motivated with a Duolingo-style streak system, XP rewards, levels, and contests.
+            Practice programming, SQL queries, and system design challenges. Stay motivated with a Duolingo-style streak system, ⚡ rewards, levels, and contests.
           </p>
 
           <div className="flex flex-wrap items-center gap-4 pt-4">
@@ -97,7 +97,7 @@ function solve(nums, target) {
               <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-xs">✓</div>
               <div>
                 <p className="text-xs font-bold text-white">All test cases passed!</p>
-                <p className="text-[10px] text-emerald-400">+20 XP • +10 Coins</p>
+                <p className="text-[10px] text-emerald-400">+20 ⚡ • +10 Coins</p>
               </div>
             </div>
           </div>

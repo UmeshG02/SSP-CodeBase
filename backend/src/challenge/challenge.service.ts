@@ -4,6 +4,8 @@ import { ProfileService } from '../profile/profile.service';
 import { CreateProblemDto } from './dto/create-problem.dto';
 import { SubmitCodeDto } from './dto/submit-code.dto';
 import { SubmitSqlDto } from './dto/submit-sql.dto';
+import { UpdateExamConfigDto } from './dto/update-exam-config.dto';
+import { LogViolationDto } from './dto/log-violation.dto';
 import { ChallengeType } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -57,6 +59,10 @@ export class ChallengeService {
     });
 
     const solvedIds = new Set(solvedSubmissions.map((s) => s.problemId));
+
+    problems.sort((a, b) => {
+      return a.slug.localeCompare(b.slug, undefined, { numeric: true, sensitivity: 'base' });
+    });
 
     return problems.map((p) => ({
       ...p,
@@ -115,6 +121,8 @@ export class ChallengeService {
           status,
           runtime: 0.1,
           memory: 128,
+          autoSubmitted: dto.autoSubmitted ?? false,
+          autoSubmitReason: dto.autoSubmitReason ?? null,
         },
       });
 
@@ -505,6 +513,7 @@ except Exception as e:
           id: tc.id,
           isSample: false,
           passed,
+          hasError: output.startsWith('ERR:') || output.startsWith('ERR '),
         };
       }
     });
@@ -533,6 +542,8 @@ except Exception as e:
         status: status as any,
         runtime,
         memory,
+        autoSubmitted: dto.autoSubmitted ?? false,
+        autoSubmitReason: dto.autoSubmitReason ?? null,
       },
     });
 
@@ -644,6 +655,8 @@ except Exception as e:
         status: status as any,
         runtime: 8.2,
         memory: 1024,
+        autoSubmitted: dto.autoSubmitted ?? false,
+        autoSubmitReason: dto.autoSubmitReason ?? null,
       },
     });
 
@@ -806,7 +819,7 @@ except Exception as e:
   private getParamTypes(slug: string): string[] {
     if (slug.startsWith('two-sum')) return ['vector<int>', 'int'];
     if (slug.startsWith('palindrome-number') || slug.startsWith('leap-year-check') || slug.startsWith('factorial-calc') || slug.startsWith('prime-check') || slug.startsWith('fibonacci-at-n') || slug.startsWith('is-square')) return ['int'];
-    if (slug.startsWith('word-reverse') || slug.startsWith('count-vowels')) return ['string'];
+    if (slug.startsWith('word-reverse') || slug.startsWith('count-vowels') || slug.startsWith('coding-w7-p4') || slug.startsWith('tcs-') || slug === 'wipro-equilibrium-index' || slug === 'infosys-unique-digit-pairs' || slug.startsWith('accenture-') || slug.startsWith('cognizant-')) return ['string'];
     if (slug.startsWith('array-sum') || slug.startsWith('array-max') || slug.startsWith('array-min') || slug.startsWith('even-filter') || slug.startsWith('multiply-array-elements')) return ['vector<int>'];
     if (slug.startsWith('celsius-to-fahrenheit')) return ['double'];
     if (slug.startsWith('contain-substring')) return ['string', 'string'];
@@ -889,5 +902,94 @@ except Exception as e:
         }
       }
     }
+  }
+
+  async getExamConfig() {
+    let config = await this.prisma.examConfig.findFirst();
+    if (!config) {
+      config = await this.prisma.examConfig.create({
+        data: {} // fallback to defaults in prisma schema
+      });
+    }
+    return config;
+  }
+
+  async updateExamConfig(dto: UpdateExamConfigDto) {
+    let config = await this.prisma.examConfig.findFirst();
+    if (!config) {
+      return this.prisma.examConfig.create({
+        data: dto
+      });
+    }
+    return this.prisma.examConfig.update({
+      where: { id: config.id },
+      data: dto
+    });
+  }
+
+  async logViolation(userId: string, dto: LogViolationDto) {
+    return this.prisma.violationLog.create({
+      data: {
+        userId,
+        problemId: dto.problemId,
+        violationType: dto.violationType,
+        details: dto.details,
+        totalCount: dto.totalCount,
+        browser: dto.browser,
+        os: dto.os,
+        ipAddress: dto.ipAddress,
+      }
+    });
+  }
+
+  async getViolations() {
+    return this.prisma.violationLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            profile: {
+              select: {
+                name: true
+              }
+            }
+          }
+        },
+        problem: {
+          select: {
+            id: true,
+            title: true
+          }
+        }
+      }
+    });
+  }
+
+  async getAutoSubmissions() {
+    return this.prisma.submission.findMany({
+      where: { autoSubmitted: true },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            profile: {
+              select: {
+                name: true
+              }
+            }
+          }
+        },
+        problem: {
+          select: {
+            id: true,
+            title: true
+          }
+        }
+      }
+    });
   }
 }

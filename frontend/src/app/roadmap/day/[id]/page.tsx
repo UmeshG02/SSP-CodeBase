@@ -223,7 +223,7 @@ export default function DayWorkspace() {
                       )}
                       <div>
                         <h4 className="text-sm font-bold text-white leading-none">{p.title}</h4>
-                        <p className="text-[10px] text-zinc-500 mt-1">Difficulty: {p.difficulty} • +{p.points} XP</p>
+                        <p className="text-[10px] text-zinc-500 mt-1">Difficulty: {p.difficulty} • +{p.points} ⚡</p>
                       </div>
                     </div>
 
@@ -258,7 +258,7 @@ export default function DayWorkspace() {
                     )}
                     <div>
                       <h4 className="text-sm font-bold text-white leading-none">{sqlProblem.title}</h4>
-                      <p className="text-[10px] text-zinc-500 mt-1">Difficulty: {sqlProblem.difficulty} • +{sqlProblem.points} XP</p>
+                      <p className="text-[10px] text-zinc-500 mt-1">Difficulty: {sqlProblem.difficulty} • +{sqlProblem.points} ⚡</p>
                     </div>
                   </div>
 
@@ -336,7 +336,7 @@ export default function DayWorkspace() {
                   )}
 
                   {aptProblem.solved && (
-                    <p className="text-xs font-bold text-emerald-400 pl-8">Quiz answered correctly (+15 XP awarded!)</p>
+                    <p className="text-xs font-bold text-emerald-400 pl-8">Quiz answered correctly (+15 ⚡ awarded!)</p>
                   )}
                 </div>
               </div>
@@ -393,7 +393,7 @@ export default function DayWorkspace() {
                   )}
 
                   {intProblem.solved && (
-                    <p className="text-xs font-bold text-emerald-400 pl-8">Interview answer recorded (+15 XP awarded!)</p>
+                    <p className="text-xs font-bold text-emerald-400 pl-8">Interview answer recorded (+15 ⚡ awarded!)</p>
                   )}
                 </div>
               </div>
@@ -451,7 +451,7 @@ export default function DayWorkspace() {
                   )}
 
                   {puzProblem.solved && (
-                    <p className="text-xs font-bold text-emerald-400 pl-8">Puzzle resolved correctly (+20 XP awarded!)</p>
+                    <p className="text-xs font-bold text-emerald-400 pl-8">Puzzle resolved correctly (+20 ⚡ awarded!)</p>
                   )}
                 </div>
               </div>

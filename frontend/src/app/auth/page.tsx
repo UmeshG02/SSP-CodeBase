@@ -1,32 +1,18 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiFetch } from '@/utils/api';
 import { Sparkles, AlertCircle } from 'lucide-react';
 
 function AuthContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   
-  // Toggle modes: login or signup
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const mode = searchParams.get('mode');
-    if (mode === 'signup') {
-      setIsLogin(false);
-    } else {
-      setIsLogin(true);
-    }
-  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,23 +20,13 @@ function AuthContent() {
     setLoading(true);
 
     try {
-      if (isLogin) {
-        const data = await apiFetch('/auth/login', {
-          method: 'POST',
-          body: JSON.stringify({ email, password }),
-        });
-        localStorage.setItem('ssp_token', data.token);
-        localStorage.setItem('ssp_user', JSON.stringify(data.user));
-        router.push('/dashboard');
-      } else {
-        const data = await apiFetch('/auth/register', {
-          method: 'POST',
-          body: JSON.stringify({ email, password, name, username }),
-        });
-        localStorage.setItem('ssp_token', data.token);
-        localStorage.setItem('ssp_user', JSON.stringify(data.user));
-        router.push('/dashboard');
-      }
+      const data = await apiFetch('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+      localStorage.setItem('ssp_token', data.token);
+      localStorage.setItem('ssp_user', JSON.stringify(data.user));
+      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Authentication failed. Please try again.');
     } finally {
@@ -66,10 +42,10 @@ function AuthContent() {
           <span>SSP CodeBase</span>
         </Link>
         <h2 className="text-2xl font-bold tracking-tight text-white">
-          {isLogin ? 'Welcome back' : 'Create an account'}
+          Welcome back
         </h2>
         <p className="text-sm text-zinc-400">
-          {isLogin ? "Enter your details to access your dashboard" : "Join today to start practice and competitive contests"}
+          Enter your details to access your dashboard
         </p>
       </div>
 
@@ -81,33 +57,6 @@ function AuthContent() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {!isLogin && (
-          <>
-            <div>
-              <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Full Name</label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="John Doe"
-                className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Username</label>
-              <input
-                type="text"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="johndoe"
-                className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors"
-              />
-            </div>
-          </>
-        )}
-
         <div>
           <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Email Address</label>
           <input
@@ -142,24 +91,11 @@ function AuthContent() {
           ) : (
             <>
               <Sparkles className="w-4 h-4" />
-              <span>{isLogin ? 'Sign In' : 'Sign Up'}</span>
+              <span>Sign In</span>
             </>
           )}
         </button>
       </form>
-
-      <div className="text-center mt-6">
-        <button
-          type="button"
-          onClick={() => {
-            setError('');
-            setIsLogin(!isLogin);
-          }}
-          className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
-        >
-          {isLogin ? "Don't have an account? Sign Up" : 'Already have an account? Sign In'}
-        </button>
-      </div>
     </div>
   );
 }

@@ -20,6 +20,13 @@ export default function Dashboard() {
   const [weekProblems, setWeekProblems] = useState<any[]>([]);
   const [problemsLoading, setProblemsLoading] = useState(false);
 
+  // Competitive MNC states
+  const [hubTab, setHubTab] = useState<'modules' | 'competitive'>('modules');
+  const [competitiveProblems, setCompetitiveProblems] = useState<any[]>([]);
+  const [loadingCompetitive, setLoadingCompetitive] = useState(false);
+  const [selectedMncFilter, setSelectedMncFilter] = useState<'ALL' | 'TCS' | 'WIPRO' | 'INFOSYS' | 'ACCENTURE' | 'COGNIZANT'>('ALL');
+  const [selectedYearFilter, setSelectedYearFilter] = useState<'ALL' | '2025' | '2024' | '2023' | '2022' | '2021'>('ALL');
+
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,11 +51,20 @@ export default function Dashboard() {
 
         const leaderData = await apiFetch('/profile/leaderboard');
         setLeaderboard(leaderData);
+
+        // Load all challenges for competitive section
+        setLoadingCompetitive(true);
+        const allProblems = await apiFetch('/challenges');
+        // Filter out those that are not associated with any day (competitive ones)
+        const compProbs = allProblems.filter((p: any) => !p.dayId);
+        setCompetitiveProblems(compProbs);
+        setLoadingCompetitive(false);
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
         router.push('/auth');
       } finally {
         setLoading(false);
+        setLoadingCompetitive(false);
       }
     }
     loadData();
@@ -117,6 +133,13 @@ export default function Dashboard() {
   const solvedProblemsCount = weekProblems.filter(p => p.solved).length;
   const progressPercent = totalProblemsCount > 0 ? Math.round((solvedProblemsCount / totalProblemsCount) * 100) : 0;
 
+  // Filter competitive problems by selected MNC tag and year tag
+  const filteredCompetitive = competitiveProblems.filter((p: any) => {
+    const matchesMnc = selectedMncFilter === 'ALL' || p.tags.some((t: string) => t.toUpperCase() === selectedMncFilter.toUpperCase());
+    const matchesYear = selectedYearFilter === 'ALL' || p.tags.some((t: string) => t === selectedYearFilter);
+    return matchesMnc && matchesYear;
+  });
+
   // Find user's active page link
   let activeDayId = null;
   const currentActiveWeek = roadmap.weeks.find((w: any) => w.weekNumber === roadmap.userProgress.currentWeek);
@@ -140,6 +163,17 @@ export default function Dashboard() {
             <span>SSP CodeBase</span>
           </Link>
           <div className="flex items-center gap-4">
+            <div className={`hidden sm:flex items-center gap-2 text-xs border-r pr-4 ${
+              theme === 'light' ? 'border-zinc-200 text-zinc-700' : 'border-zinc-800 text-zinc-300'
+            }`}>
+              <div className={`w-5 h-5 rounded-full flex items-center justify-center font-extrabold text-[10px] ${
+                theme === 'light' ? 'bg-indigo-50 text-indigo-600' : 'bg-indigo-950/40 text-indigo-400 border border-indigo-500/20'
+              }`}>
+                {profile?.name?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <span>Hi, <span className={`font-black ${theme === 'light' ? 'text-zinc-950' : 'text-white'}`}>{profile?.name}</span></span>
+            </div>
+            
             <div className="flex items-center gap-3 text-xs font-semibold">
               <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${
                 theme === 'light'
@@ -228,109 +262,252 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Practice Hub */}
-          <div className={`p-6 rounded-2xl border space-y-6 ${
-            theme === 'light'
-              ? 'bg-white border-zinc-200 shadow-sm'
-              : 'bg-zinc-900/40 border-zinc-900'
-          }`}>
-            
-            {/* Horizontal Module Tabs Selector */}
-            <div className={`flex items-center gap-2 overflow-x-auto pb-2 border-b scrollbar-none ${
-              theme === 'light' ? 'border-zinc-200' : 'border-zinc-900'
-            }`}>
-              {roadmap.weeks.map((w: any) => (
-                <button
-                  key={w.id}
-                  onClick={() => setSelectedWeekNum(w.weekNumber)}
-                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex-shrink-0 cursor-pointer ${
-                    selectedWeekNum === w.weekNumber
-                      ? 'bg-indigo-600 text-white shadow'
-                      : theme === 'light'
-                        ? 'text-zinc-600 hover:bg-zinc-100'
-                        : 'text-zinc-400 hover:bg-zinc-900'
-                  }`}
-                >
-                  Module {w.weekNumber}
-                </button>
-              ))}
-            </div>
+          {/* Tab Selector: curriculum modules vs competitive exams */}
+          <div className="flex gap-4 p-1.5 rounded-2xl bg-zinc-950/60 border border-zinc-900">
+            <button
+              onClick={() => setHubTab('modules')}
+              className={`flex-1 py-3 px-4 rounded-xl text-xs font-black tracking-wide flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                hubTab === 'modules'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/10'
+                  : theme === 'light'
+                    ? 'text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900'
+                    : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'
+              }`}
+            >
+              <Compass className="w-4 h-4" />
+              <span>Module Wise Curriculum</span>
+            </button>
+            <button
+              onClick={() => setHubTab('competitive')}
+              className={`flex-1 py-3 px-4 rounded-xl text-xs font-black tracking-wide flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                hubTab === 'competitive'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/10'
+                  : theme === 'light'
+                    ? 'text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900'
+                    : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'
+              }`}
+            >
+              <Award className="w-4 h-4" />
+              <span>Competitive Exams (TCS/Wipro/MNCs)</span>
+            </button>
+          </div>
 
-            {/* Week Focus Title */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <h3 className={`text-base font-extrabold ${theme === 'light' ? 'text-zinc-950' : 'text-white'}`}>{selectedWeek.title}</h3>
-                <p className="text-xs text-zinc-500">Master core concepts by completing these 10 challenges.</p>
+          {hubTab === 'modules' ? (
+            <div className={`p-6 rounded-2xl border space-y-6 ${
+              theme === 'light'
+                ? 'bg-white border-zinc-200 shadow-sm'
+                : 'bg-zinc-900/40 border-zinc-900'
+            }`}>
+              
+              {/* Horizontal Module Tabs Selector */}
+              <div className={`flex items-center gap-2 overflow-x-auto pb-2 border-b scrollbar-none ${
+                theme === 'light' ? 'border-zinc-200' : 'border-zinc-900'
+              }`}>
+                {roadmap.weeks.map((w: any) => (
+                  <button
+                    key={w.id}
+                    onClick={() => setSelectedWeekNum(w.weekNumber)}
+                    className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex-shrink-0 cursor-pointer ${
+                      selectedWeekNum === w.weekNumber
+                        ? 'bg-indigo-600 text-white shadow'
+                        : theme === 'light'
+                          ? 'text-zinc-650 hover:bg-zinc-100 hover:text-zinc-900'
+                          : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'
+                    }`}
+                  >
+                    Module {w.weekNumber}
+                  </button>
+                ))}
               </div>
-              {isWeekUnlocked && totalProblemsCount > 0 && (
-                <div className="text-right">
-                  <span className="text-xs font-bold text-indigo-400">{solvedProblemsCount} / {totalProblemsCount} Solved</span>
-                  <div className="w-32 h-1.5 bg-zinc-800 rounded-full overflow-hidden mt-1">
-                    <div className="h-full bg-indigo-500 transition-all duration-300" style={{ width: `${progressPercent}%` }} />
+
+              {/* Week Focus Title */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <h3 className={`text-base font-extrabold ${theme === 'light' ? 'text-zinc-950' : 'text-white'}`}>{selectedWeek.title}</h3>
+                  <p className="text-xs text-zinc-500">Master core concepts by completing these 10 challenges.</p>
+                </div>
+                {isWeekUnlocked && totalProblemsCount > 0 && (
+                  <div className="text-right">
+                    <span className="text-xs font-bold text-indigo-400">{solvedProblemsCount} / {totalProblemsCount} Solved</span>
+                    <div className="w-32 h-1.5 bg-zinc-800 rounded-full overflow-hidden mt-1">
+                      <div className="h-full bg-indigo-500 transition-all duration-300" style={{ width: `${progressPercent}%` }} />
+                    </div>
                   </div>
+                )}
+              </div>
+
+              {/* Weekly Problems List (Locks Evaluator) */}
+              {!isWeekUnlocked ? (
+                <div className={`p-12 text-center rounded-xl border flex flex-col items-center justify-center space-y-4 ${
+                  theme === 'light' ? 'bg-zinc-50 border-zinc-200' : 'bg-zinc-900/50 border-zinc-850'
+                }`}>
+                  <Lock className={`w-8 h-8 ${theme === 'light' ? 'text-zinc-400' : 'text-zinc-600'}`} />
+                  <h4 className={`text-sm font-bold ${theme === 'light' ? 'text-zinc-850' : 'text-white'}`}>Module Locked</h4>
+                  <p className="text-xs text-zinc-500 max-w-sm">Complete all coding challenges in the previous modules to unlock this module.</p>
+                  
+                  <div className="w-8 h-px bg-zinc-800 my-2" />
+                  
+                  <form 
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      const keyInput = (e.target as any).elements.accessKey.value;
+                      if (!keyInput) return;
+                      try {
+                        const res = await apiFetch('/roadmap/unlock-with-key', {
+                          method: 'POST',
+                          body: { key: keyInput }
+                        });
+                        if (res.success) {
+                          alert(`Successfully unlocked "${res.title}" with access key!`);
+                          window.location.reload();
+                        }
+                      } catch (err: any) {
+                        alert(err.message || 'Invalid key.');
+                      }
+                    }}
+                    className="w-full max-w-xs space-y-2"
+                  >
+                    <input
+                      type="text"
+                      name="accessKey"
+                      placeholder="Enter Module Access Key..."
+                      className={`w-full px-3 py-2 text-xs rounded-lg border text-center outline-none ${
+                        theme === 'light' ? 'bg-white border-zinc-300 text-zinc-950 focus:border-indigo-500' : 'bg-zinc-950 border-zinc-800 text-white focus:border-indigo-500'
+                      }`}
+                    />
+                    <button
+                      type="submit"
+                      className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 transition-all text-xs font-bold rounded-lg text-white cursor-pointer"
+                    >
+                      Unlock Module with Key
+                    </button>
+                  </form>
+                </div>
+              ) : problemsLoading ? (
+                <div className="py-12 flex justify-center">
+                  <div className="w-6 h-6 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  
+                  {/* 1. EASY Tier (5 questions) */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black text-emerald-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <span>Easy Level</span>
+                      <span className="text-zinc-500 font-normal font-sans">(5 challenges)</span>
+                    </h4>
+                    <div className="grid gap-2">
+                      {easyProblems.map((p: any) => (
+                        <ChallengeItem key={p.id} p={p} theme={theme} />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 2. MEDIUM Tier (3 questions) */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <span>Medium Level</span>
+                      <span className="text-zinc-500 font-normal font-sans">(3 challenges)</span>
+                    </h4>
+                    <div className="grid gap-2">
+                      {mediumProblems.map((p: any) => (
+                        <ChallengeItem key={p.id} p={p} theme={theme} />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 3. HARD Tier (2 questions) */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black text-rose-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <span>Hard Level</span>
+                      <span className="text-zinc-500 font-normal font-sans">(2 challenges)</span>
+                    </h4>
+                    <div className="grid gap-2">
+                      {hardProblems.map((p: any) => (
+                        <ChallengeItem key={p.id} p={p} theme={theme} />
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+            </div>
+          ) : (
+            <div className={`p-6 rounded-2xl border space-y-6 ${
+              theme === 'light'
+                ? 'bg-white border-zinc-200 shadow-sm'
+                : 'bg-zinc-900/40 border-zinc-900'
+            }`}>
+              {/* MNC Filter Tabs */}
+              <div className={`flex items-center gap-2 overflow-x-auto pb-2 border-b scrollbar-none ${
+                theme === 'light' ? 'border-zinc-200' : 'border-zinc-900'
+              }`}>
+                {(['ALL', 'TCS', 'WIPRO', 'INFOSYS', 'ACCENTURE', 'COGNIZANT'] as const).map((mnc) => (
+                  <button
+                    key={mnc}
+                    onClick={() => setSelectedMncFilter(mnc)}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all flex-shrink-0 cursor-pointer ${
+                      selectedMncFilter === mnc
+                        ? 'bg-indigo-600 text-white shadow'
+                        : theme === 'light'
+                          ? 'text-zinc-650 hover:bg-zinc-100 hover:text-zinc-900'
+                          : 'text-zinc-400 hover:bg-zinc-900 hover:text-white'
+                    }`}
+                  >
+                    {mnc === 'ALL' ? 'All Companies' : mnc}
+                  </button>
+                ))}
+              </div>
+
+              {/* Year Filter Sub-Bar */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="text-[10px] uppercase font-bold text-zinc-500 mr-1">Filter Year:</span>
+                {(['ALL', '2025', '2024', '2023', '2022', '2021'] as const).map((yr) => (
+                  <button
+                    key={yr}
+                    onClick={() => setSelectedYearFilter(yr)}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
+                      selectedYearFilter === yr
+                        ? 'bg-zinc-800 text-white border border-zinc-700'
+                        : theme === 'light'
+                          ? 'text-zinc-650 bg-zinc-150 hover:bg-zinc-200'
+                          : 'text-zinc-400 bg-zinc-950/40 hover:bg-zinc-900 border border-transparent'
+                    }`}
+                  >
+                    {yr === 'ALL' ? 'All Years' : yr}
+                  </button>
+                ))}
+              </div>
+
+              {/* Title & Description */}
+              <div className="space-y-1">
+                <h3 className={`text-base font-extrabold ${theme === 'light' ? 'text-zinc-950' : 'text-white'}`}>
+                  MNC Placement Coding Papers
+                </h3>
+                <p className="text-xs text-zinc-500">
+                  Practice past 5 years actual coding questions from top recruiters.
+                </p>
+              </div>
+
+              {/* Problems list */}
+              {loadingCompetitive ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="w-6 h-6 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
+                </div>
+              ) : filteredCompetitive.length > 0 ? (
+                <div className="grid gap-4">
+                  {filteredCompetitive.map((p: any) => (
+                    <ChallengeItem key={p.id} p={p} theme={theme} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-zinc-500 text-xs">
+                  No MNC questions found for this category.
                 </div>
               )}
             </div>
-
-            {/* Weekly Problems List (Locks Evaluator) */}
-            {!isWeekUnlocked ? (
-              <div className={`p-12 text-center rounded-xl border flex flex-col items-center justify-center space-y-3 ${
-                theme === 'light' ? 'bg-zinc-50 border-zinc-200' : 'bg-zinc-900/50 border-zinc-850'
-              }`}>
-                <Lock className={`w-8 h-8 ${theme === 'light' ? 'text-zinc-400' : 'text-zinc-600'}`} />
-                <h4 className={`text-sm font-bold ${theme === 'light' ? 'text-zinc-850' : 'text-white'}`}>Module Locked</h4>
-                <p className="text-xs text-zinc-500 max-w-sm">Complete all coding challenges in the previous modules to unlock this module.</p>
-              </div>
-            ) : problemsLoading ? (
-              <div className="py-12 flex justify-center">
-                <div className="w-6 h-6 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
-              </div>
-            ) : (
-              <div className="space-y-6">
-                
-                {/* 1. EASY Tier (5 questions) */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-black text-emerald-500 uppercase tracking-wider flex items-center gap-1.5">
-                    <span>Easy Level</span>
-                    <span className="text-zinc-500 font-normal font-sans">(5 challenges)</span>
-                  </h4>
-                  <div className="grid gap-2">
-                    {easyProblems.map((p: any) => (
-                      <ChallengeItem key={p.id} p={p} theme={theme} />
-                    ))}
-                  </div>
-                </div>
-
-                {/* 2. MEDIUM Tier (3 questions) */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-black text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
-                    <span>Medium Level</span>
-                    <span className="text-zinc-500 font-normal font-sans">(3 challenges)</span>
-                  </h4>
-                  <div className="grid gap-2">
-                    {mediumProblems.map((p: any) => (
-                      <ChallengeItem key={p.id} p={p} theme={theme} />
-                    ))}
-                  </div>
-                </div>
-
-                {/* 3. HARD Tier (2 questions) */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-black text-rose-500 uppercase tracking-wider flex items-center gap-1.5">
-                    <span>Hard Level</span>
-                    <span className="text-zinc-500 font-normal font-sans">(2 challenges)</span>
-                  </h4>
-                  <div className="grid gap-2">
-                    {hardProblems.map((p: any) => (
-                      <ChallengeItem key={p.id} p={p} theme={theme} />
-                    ))}
-                  </div>
-                </div>
-
-              </div>
-            )}
-
-          </div>
+          )}
 
         </div>
 
@@ -402,7 +579,7 @@ export default function Dashboard() {
                         <p className="text-[9px] text-zinc-500">Level {u.level}</p>
                       </div>
                     </div>
-                    <span className="text-xs font-black text-indigo-500">{u.xp} XP</span>
+                    <span className="text-xs font-black text-indigo-500">{u.xp} ⚡</span>
                   </div>
                 );
               })}
@@ -434,7 +611,7 @@ function ChallengeItem({ p, theme }: { p: any, theme: 'dark' | 'light' }) {
         <div>
           <h5 className={`text-sm font-bold leading-tight ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`}>{p.title.replace(/^.*:\s*/, '')}</h5>
           <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 mt-1">
-            <span>+{p.points} XP</span>
+            <span>+{p.points} ⚡</span>
             <span>•</span>
             {p.tags.map((t: string) => (
               <span key={t} className={`px-1.5 py-0.5 rounded text-[9px] ${
