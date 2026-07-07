@@ -59,6 +59,9 @@ export default function AdminPortal() {
   const [userRoleFilter, setUserRoleFilter] = useState('');
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [showResetPassModal, setShowResetPassModal] = useState(false);
+  const [resetPassUser, setResetPassUser] = useState<{ id: string; username: string; email: string } | null>(null);
+  const [newPasswordVal, setNewPasswordVal] = useState('');
 
   // Create User Form state
   const [createUserForm, setCreateUserForm] = useState({
@@ -126,6 +129,8 @@ export default function AdminPortal() {
     setTheme(nextTheme);
     localStorage.setItem('ssp_theme', nextTheme);
   };
+
+  const isLightTheme = theme === 'light';
 
   // Helper to trigger transient toasts
   const triggerToast = (type: 'success' | 'error', message: string) => {
@@ -555,23 +560,32 @@ export default function AdminPortal() {
     }
   };
 
-  // Reset Password override
-  const handleResetPassword = async (userId: string) => {
-    const newPassword = prompt('Enter the new password for this user (minimum 6 characters):');
-    if (newPassword === null) return; // Admin cancelled the prompt
+  // Open Reset Password modal
+  const handleOpenResetPasswordModal = (user: any) => {
+    setResetPassUser({ id: user.id, username: user.profile?.username || 'user', email: user.email });
+    setNewPasswordVal('');
+    setShowResetPassModal(true);
+  };
 
-    const trimmed = newPassword.trim();
+  // Reset Password submit
+  const handleResetPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetPassUser) return;
+
+    const trimmed = newPasswordVal.trim();
     if (trimmed.length < 6) {
       alert('Password must be at least 6 characters long.');
       return;
     }
 
     try {
-      await apiFetch(`/admin/users/${userId}/reset-password`, { 
+      await apiFetch(`/admin/users/${resetPassUser.id}/reset-password`, { 
         method: 'POST',
         body: { password: trimmed }
       });
       triggerToast('success', 'User password successfully updated');
+      setShowResetPassModal(false);
+      setResetPassUser(null);
     } catch (err: any) {
       triggerToast('error', err.message || 'Reset password failed');
     }
@@ -1468,7 +1482,7 @@ export default function AdminPortal() {
                             <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
                               <div className="flex justify-end gap-2">
                                 <button
-                                  onClick={() => handleResetPassword(user.id)}
+                                  onClick={() => handleOpenResetPasswordModal(user)}
                                   className={`p-1.5 rounded-lg border text-[10px] font-bold transition-all cursor-pointer ${
                                     theme === 'light' ? 'bg-zinc-100 border-zinc-250 hover:bg-zinc-200 text-zinc-800' : 'bg-zinc-950 border-zinc-900 hover:bg-zinc-800 text-zinc-200'
                                   }`}
@@ -2857,6 +2871,63 @@ export default function AdminPortal() {
                 {adminActionLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Extend Lock'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {showResetPassModal && resetPassUser && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur flex items-center justify-center p-4">
+          <div className={`max-w-md w-full p-8 rounded-2xl border shadow-2xl space-y-6 ${
+            isLightTheme ? 'bg-white border-zinc-250 text-zinc-900' : 'bg-zinc-900 border-zinc-850 text-white'
+          }`}>
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-black">Reset User Password</h3>
+              <button 
+                onClick={() => { setShowResetPassModal(false); setResetPassUser(null); }}
+                className="text-xs text-zinc-500 hover:text-white cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+
+            <div className="text-xs text-zinc-400">
+              Resetting password for: <span className="font-bold text-zinc-250">@{resetPassUser.username}</span> ({resetPassUser.email})
+            </div>
+
+            <form onSubmit={handleResetPasswordSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-extrabold uppercase text-zinc-455">New Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Minimum 6 characters"
+                  value={newPasswordVal}
+                  onChange={(e) => setNewPasswordVal(e.target.value)}
+                  className={`w-full p-2.5 rounded-lg border text-xs outline-none ${
+                    isLightTheme ? 'bg-zinc-50 border-zinc-200 text-zinc-900' : 'bg-zinc-950 border-zinc-800 text-white'
+                  }`}
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowResetPassModal(false); setResetPassUser(null); }}
+                  className={`flex-1 py-2.5 rounded-xl text-xs font-black tracking-wider uppercase border transition-colors cursor-pointer ${
+                    isLightTheme ? 'border-zinc-300 text-zinc-700 hover:bg-zinc-100' : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                  }`}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-black tracking-wider uppercase text-white transition-colors cursor-pointer"
+                >
+                  Update Password
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
