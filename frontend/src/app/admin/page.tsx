@@ -557,12 +557,23 @@ export default function AdminPortal() {
 
   // Reset Password override
   const handleResetPassword = async (userId: string) => {
+    const newPassword = prompt('Enter the new password for this user (minimum 6 characters):');
+    if (newPassword === null) return; // Admin cancelled the prompt
+
+    const trimmed = newPassword.trim();
+    if (trimmed.length < 6) {
+      alert('Password must be at least 6 characters long.');
+      return;
+    }
+
     try {
-      const data = await apiFetch(`/admin/users/${userId}/reset-password`, { method: 'POST' });
-      alert(`Temporary password generated successfully:\n\n${data.tempPassword}\n\nPlease copy this password and share it securely with the user.`);
-      triggerToast('success', 'Temporary password generated');
+      await apiFetch(`/admin/users/${userId}/reset-password`, { 
+        method: 'POST',
+        body: { password: trimmed }
+      });
+      triggerToast('success', 'User password successfully updated');
     } catch (err: any) {
-      triggerToast('error', 'Reset password failed');
+      triggerToast('error', err.message || 'Reset password failed');
     }
   };
 
