@@ -62,6 +62,8 @@ export default function AdminPortal() {
   const [showResetPassModal, setShowResetPassModal] = useState(false);
   const [resetPassUser, setResetPassUser] = useState<{ id: string; username: string; email: string } | null>(null);
   const [newPasswordVal, setNewPasswordVal] = useState('');
+  const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+  const [deleteUserTarget, setDeleteUserTarget] = useState<{ id: string; username: string; email: string } | null>(null);
 
   // Create User Form state
   const [createUserForm, setCreateUserForm] = useState({
@@ -547,12 +549,20 @@ export default function AdminPortal() {
     }
   };
 
-  // Delete User override
-  const handleDeleteUser = async (userId: string) => {
-    if (!confirm('WARNING: Deleting this user account will permanently purge their profile, credentials, code submissions, progress, and rankings. This action is destructive and CANNOT be undone. Proceed?')) return;
+  // Open Delete User modal
+  const handleOpenDeleteUserModal = (user: any) => {
+    setDeleteUserTarget({ id: user.id, username: user.profile?.username || 'user', email: user.email });
+    setShowDeleteUserModal(true);
+  };
+
+  // Delete User confirm submit
+  const handleDeleteUserConfirm = async () => {
+    if (!deleteUserTarget) return;
     try {
-      await apiFetch(`/admin/users/${userId}`, { method: 'DELETE' });
+      await apiFetch(`/admin/users/${deleteUserTarget.id}`, { method: 'DELETE' });
       triggerToast('success', 'User account permanently deleted');
+      setShowDeleteUserModal(false);
+      setDeleteUserTarget(null);
       setSelectedUser(null);
       fetchUsers();
     } catch (err: any) {
@@ -1491,7 +1501,7 @@ export default function AdminPortal() {
                                   Reset Pass
                                 </button>
                                 <button
-                                  onClick={() => handleDeleteUser(user.id)}
+                                  onClick={() => handleOpenDeleteUserModal(user)}
                                   className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-[10px] font-bold cursor-pointer"
                                   title="Delete user permanently"
                                 >
@@ -2928,6 +2938,55 @@ export default function AdminPortal() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete User Confirmation Modal */}
+      {showDeleteUserModal && deleteUserTarget && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur flex items-center justify-center p-4">
+          <div className={`max-w-md w-full p-8 rounded-2xl border shadow-2xl space-y-6 ${
+            isLightTheme ? 'bg-white border-zinc-250 text-zinc-900' : 'bg-zinc-900 border-zinc-850 text-white'
+          }`}>
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-black text-rose-500">Delete User Account</h3>
+              <button 
+                onClick={() => { setShowDeleteUserModal(false); setDeleteUserTarget(null); }}
+                className="text-xs text-zinc-500 hover:text-white cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="text-xs text-zinc-400">
+                Are you sure you want to permanently delete user <span className="font-bold text-zinc-200">@{deleteUserTarget.username}</span> ({deleteUserTarget.email})?
+              </div>
+
+              <div className={`p-4 rounded-xl border text-xs leading-relaxed ${
+                isLightTheme ? 'bg-rose-550/5 border-rose-200 text-rose-800' : 'bg-rose-950/20 border-rose-900/50 text-rose-400'
+              }`}>
+                <strong>WARNING:</strong> Deleting this user account will permanently purge their profile, credentials, code submissions, progress, and rankings. This action is destructive and <strong>CANNOT</strong> be undone.
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => { setShowDeleteUserModal(false); setDeleteUserTarget(null); }}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-black tracking-wider uppercase border transition-colors cursor-pointer ${
+                  isLightTheme ? 'border-zinc-300 text-zinc-700 hover:bg-zinc-100' : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteUserConfirm}
+                className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 rounded-xl text-xs font-black tracking-wider uppercase text-white transition-colors cursor-pointer"
+              >
+                Delete Account
+              </button>
+            </div>
           </div>
         </div>
       )}
