@@ -23,6 +23,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
+# Limit memory usage during Next.js compilation to prevent OOM errors
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+
 RUN npm run build
 
 # Stage 3: Runner

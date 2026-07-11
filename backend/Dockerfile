@@ -22,6 +22,9 @@ RUN npx prisma generate
 COPY tsconfig.json tsconfig.build.json eslint.config.mjs nest-cli.json ./
 COPY src ./src/
 
+# Limit memory usage during NestJS compilation to prevent OOM errors
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+
 # Build the NestJS application
 RUN npm run build
 
