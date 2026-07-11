@@ -25,6 +25,40 @@ services:
     networks:
       - ssp-network
 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ssp-backend
+    ports:
+      - '3001:3001'
+    environment:
+      - PORT=3001
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/sspcodebase?schema=public
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=development-jwt-secret-key-12345
+      - OPENAI_API_KEY=mock-or-real-key
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - ssp-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:3001
+    container_name: ssp-frontend
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend
+    networks:
+      - ssp-network
+
 volumes:
   pgdata:
   redisdata:
@@ -32,3 +66,4 @@ volumes:
 networks:
   ssp-network:
     driver: bridge
+
